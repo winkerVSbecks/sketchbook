@@ -60,7 +60,7 @@ canvasSketch(() => {
 
         // Draw
         context.save();
-        context.fillStyle = colourScale(n2);
+        context.fillStyle = '#fff'; // colourScale(n2);
 
         context.translate(t.x, t.y);
         context.transform(1 * n, 0.2 * n2, 0.2 * n3, 1 * n1, 0, 0);
