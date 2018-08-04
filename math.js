@@ -32,10 +32,30 @@ function noiseGrid(simplex, gridSize) {
     );
 }
 
+function lerp(v0, v1, t) {
+  return v0 * (1 - t) + v1 * t;
+}
+
+function randomNumber(start, end) {
+  return Math.floor(Math.random() * end) + start;
+}
+
+function range(count) {
+  return Array.from(Array(count).keys());
+}
+
+function degreesToRadians(angleInDegrees) {
+  return (Math.PI * angleInDegrees) / 180;
+}
+
 module.exports = {
   heading,
   calcVec,
   normalize,
   constrain,
   noiseGrid,
+  lerp,
+  randomNumber,
+  range,
+  degreesToRadians,
 };

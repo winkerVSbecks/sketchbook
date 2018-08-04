@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "canvas-sketch --output=tmp/ --open",
-    "gif": "canvas-sketch-gif tmp/ --fps=24"
+    "gif": "canvas-sketch-gif tmp/ --fps=24",
+    "postgif": "rm -rf tmp/"
   },
   "keywords": [],
   "author": "",
@@ -14,9 +15,12 @@
   "dependencies": {
     "@tweenjs/tween.js": "^17.2.0",
     "canvas-sketch": "0.0.15",
+    "cardinal-spline-js": "^2.3.9",
     "chroma-js": "^1.3.7",
+    "hsluv": "0.0.3",
     "lerp": "^1.0.3",
     "p5": "^0.6.1",
+    "ramda": "^0.25.0",
     "simplex-noise": "^2.4.0"
   }
 }
