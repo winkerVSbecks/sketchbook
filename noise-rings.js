@@ -35,21 +35,10 @@ canvasSketch(() => {
 
     // Setup
     const time = Math.sin(playhead * opts.timeLoops * Math.PI);
-    const radii = range(opts.circleCount).map(
-      idx => width * 0.125 + width * 0.05 * idx,
-    );
-    const circles = radii.map(radius => {
-      const pts = arcs(opts.segmentCount, radius).map(({ r, theta }) => ({
-        r:
-          r +
-          r *
-            opts.displacement *
-            simplex.noise3D(r, theta, opts.loop ? time : playhead),
-        theta,
-      }));
-
-      return polygon([width / 2, height / 2], pts);
-    });
+    const circles = R.pipe(
+      concentricRadii(width),
+      generateCircles(width, height, time, playhead, opts),
+    )(opts.circleCount);
 
     // Draw
     context.lineWidth = width * 0.01;
@@ -68,4 +57,32 @@ function drawCircle(context) {
       context.closePath();
     },
   );
+}
+
+var f = n => (n > 50 ? false : [-n, n + 10]);
+R.unfold(f, 10); //=> [-10, -20, -30, -40, -50]
+
+function concentricRadii(width) {
+  return circleCount =>
+    range(circleCount).map(idx => width * 0.125 + width * 0.05 * idx);
+}
+
+function generateCircles(
+  width,
+  height,
+  time,
+  playhead,
+  { segmentCount, displacement, loop },
+) {
+  return radii =>
+    radii.map(radius => {
+      const pts = arcs(segmentCount, radius).map(({ r, theta }) => ({
+        r:
+          r +
+          r * displacement * simplex.noise3D(r, theta, loop ? time : playhead),
+        theta,
+      }));
+
+      return polygon([width / 2, height / 2], pts);
+    });
 }
