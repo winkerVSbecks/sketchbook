@@ -31,20 +31,23 @@ function regularPolygon([cx, cy], sideCount, radius, offset = 0) {
   ]);
 }
 
-function translate([cx, cy], pts) {
-  return pts.map(({ r, theta }) => [
-    cx + r * Math.cos(theta),
-    cy + r * Math.sin(theta),
-  ]);
+function translateAll([cx, cy], pts) {
+  return pts.map(translate([cx, cy]));
 }
 
-function drawShape(context, [start, ...pts]) {
+function translate([cx, cy]) {
+  return ({ r, theta }) => [cx + r * Math.cos(theta), cy + r * Math.sin(theta)];
+}
+
+function drawShape(context, [start, ...pts], closed = true) {
   context.beginPath();
   context.moveTo(...start);
   pts.forEach(pt => {
     context.lineTo(...pt);
   });
-  context.closePath();
+  if (closed) {
+    context.closePath();
+  }
 }
 
 module.exports = {
@@ -52,6 +55,7 @@ module.exports = {
   arcs,
   regularPolygon,
   translate,
+  translateAll,
   drawShape,
   range,
 };
