@@ -5,12 +5,12 @@ const getCurvePoints = require('cardinal-spline-js/').getCurvePoints;
 const { curve } = require('cardinal-spline-js/curve_func.min');
 const R = require('ramda');
 const { normalize, noiseGrid, randomNumber, range } = require('./math');
-const { regularPolygon, polygon, drawShape, arcs } = require('./geometry');
+const { regularPolygon, translate, drawShape, arcs } = require('./geometry');
 
 const simplex = new SimplexNoise('1234567890abcdefghijklmnopqrstuvwxyz');
 
 const settings = {
-  // animate: true,
+  animate: true,
   duration: 8,
   dimensions: [800, 800],
   scaleToView: true,
@@ -24,26 +24,41 @@ canvasSketch(() => {
     segmentCount: 24,
     timeLoops: 2,
     loop: true,
-    displacement: 0.125,
+    displacement: 0.125 / 4,
+    curves: true,
+    radius: {
+      start: 0.3, //0.0625,
+      delta: 0.05,
+    },
   };
+
+  let time = 0;
 
   return ({ context, frame, width, height, playhead }) => {
     // clear
     context.clearRect(0, 0, width, height);
-    context.fillStyle = '#fff';
+    context.fillStyle = '#222';
     context.fillRect(0, 0, width, height);
 
     // Setup
-    const time = Math.sin(playhead * opts.timeLoops * Math.PI);
+    time += 0.025; // = Math.sin(playhead * opts.timeLoops * Math.PI);
     const circles = R.pipe(
-      concentricRadii(width),
+      concentricRadii(width, opts.radius),
       generateCircles(width, height, time, playhead, opts),
     )(opts.circleCount);
 
     // Draw
-    context.lineWidth = width * 0.01;
-    context.strokeStyle = '#222';
-    circles.forEach(drawCircle(context));
+    context.lineWidth = width * 0.001;
+    context.strokeStyle = '#fff';
+
+    if (opts.curves) {
+      circles.forEach(drawCircle(context));
+    } else {
+      circles.forEach(pts => {
+        drawShape(context, pts);
+        context.stroke();
+      });
+    }
   };
 }, settings);
 
@@ -52,19 +67,18 @@ function drawCircle(context) {
     R.flatten,
     pts => {
       context.beginPath();
-      curve(context, pts, 0.5, 25, true);
+      curve(context, pts, 0.4, 48, true);
       context.stroke();
       context.closePath();
     },
   );
 }
 
-var f = n => (n > 50 ? false : [-n, n + 10]);
-R.unfold(f, 10); //=> [-10, -20, -30, -40, -50]
-
-function concentricRadii(width) {
+function concentricRadii(width, radius) {
   return circleCount =>
-    range(circleCount).map(idx => width * 0.125 + width * 0.05 * idx);
+    range(circleCount).map(
+      idx => width * radius.start + width * radius.delta * idx,
+    );
 }
 
 function generateCircles(
@@ -74,15 +88,19 @@ function generateCircles(
   playhead,
   { segmentCount, displacement, loop },
 ) {
-  return radii =>
-    radii.map(radius => {
-      const pts = arcs(segmentCount, radius).map(({ r, theta }) => ({
-        r:
-          r +
-          r * displacement * simplex.noise3D(r, theta, loop ? time : playhead),
-        theta,
-      }));
+  return R.pipe(
+    R.map(radius => arcs(segmentCount, radius)),
+    R.map(displacePts(displacement, loop, time, playhead)),
+    R.map(pts => translate([width / 2, height / 2], pts)),
+  );
+}
 
-      return polygon([width / 2, height / 2], pts);
-    });
+function displacePts(displacement, loop, time, playhead) {
+  return pts =>
+    pts.map(({ r, theta }) => ({
+      r:
+        r +
+        r * displacement * simplex.noise3D(theta, 0, loop ? time : playhead),
+      theta,
+    }));
 }

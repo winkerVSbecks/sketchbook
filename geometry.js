@@ -31,7 +31,7 @@ function regularPolygon([cx, cy], sideCount, radius, offset = 0) {
   ]);
 }
 
-function polygon([cx, cy], pts) {
+function translate([cx, cy], pts) {
   return pts.map(({ r, theta }) => [
     cx + r * Math.cos(theta),
     cy + r * Math.sin(theta),
@@ -51,7 +51,7 @@ module.exports = {
   drawEqTriangle,
   arcs,
   regularPolygon,
-  polygon,
+  translate,
   drawShape,
   range,
 };
