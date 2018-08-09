@@ -1,42 +1,64 @@
 const canvasSketch = require('canvas-sketch');
+const chroma = require('chroma-js');
 const { squareGrid } = require('./grid');
 const { randomNumber } = require('./math');
 
 const settings = {
   animate: true,
-  duration: 6,
+  duration: 8,
   dimensions: [640, 640],
   scaleToView: true,
-  playbackRate: 'throttle',
-  fps: 24,
+  // playbackRate: 'throttle',
+  // fps: 24,
+  clrs: [
+    ['#111113', '#8925DD', '#40EDE8'],
+    ['#462A4A', '#A04595', '#EA433E'],
+    ['#FEE6EC', '#353FFB', '#FDFD72'],
+    ['#e3a943', '#c37a01', '#f8a006'],
+    ['#290d0c', '#c41a1d', '#e4413f'],
+    ['#620a09', '#9f0f0c', '#800c0a'],
+    // ['#f6bfb1', '#f76246', '#e82e20'],
+    ['#f6bfb1', '#e82e20', '#e82e20'],
+  ],
+  size: 1.2,
 };
 
 canvasSketch(() => {
-  const SUM_THRESHOLD = 3;
-  const NUM_CIRCLES = 10;
+  const SUM_THRESHOLD = 1;
+  const NUM_CIRCLES = 5;
   const RESOLUTION = 128;
+  const scale = chroma
+    .scale(settings.clrs[settings.clrs.length - 1])
+    .domain([0, SUM_THRESHOLD, SUM_THRESHOLD * 8]);
+
   let circles = [];
   for (var i = 0; i < NUM_CIRCLES; i++) {
     circles.push({
+      // x: randomNumber(
+      //   settings.dimensions[0] * 0.4,
+      //   settings.dimensions[0] * 0.8,
+      // ),
+      // y: randomNumber(
+      //   settings.dimensions[1] * 0.6,
+      //   settings.dimensions[1] * 0.8,
+      // ),
+      // r: randomNumber(40 * 1.25, 80 * 1.25),
       x: randomNumber(0, settings.dimensions[0]),
       y: randomNumber(0, settings.dimensions[1]),
       r: randomNumber(40, 80),
       vx: randomNumber(-5, 5),
       vy: randomNumber(-5, 5),
-      red: randomNumber(50, 255),
-      green: randomNumber(50, 255),
-      blue: randomNumber(50, 255),
     });
   }
 
   return ({ context, frame, width, height, playhead }) => {
+    // Clear
     context.clearRect(0, 0, width, height);
-    context.fillStyle = '#2D2B36';
+    context.fillStyle = settings.background;
     context.fillRect(0, 0, width, height);
 
-    for (var i = 0; i < circles.length; i++) {
-      var c = circles[i];
-
+    // Move the circles
+    circles.forEach(c => {
       c.x += c.vx;
       c.y += c.vy;
 
@@ -52,38 +74,28 @@ canvasSketch(() => {
       if (c.y + c.r > height) {
         c.vy = -Math.abs(c.vy);
       }
-    }
+    });
 
-    // context.fillStyle = 'white';
-
+    // Draw the metaballs
     squareGrid({
       size: width,
       resolution: RESOLUTION,
       padding: 0,
       forEach: ({ x, y, s }) => {
-        // Draw the pixel
-        var sum = 0;
-        var closestD2 = Infinity;
-        var closestColor = null;
-        for (var i = 0; i < circles.length; i++) {
-          var c = circles[i];
-          var dx = x - c.x;
-          var dy = y - c.y;
-          var d2 = dx * dx + dy * dy;
-          sum += (c.r * c.r) / d2;
+        const sum = circles.reduce((sum, c) => {
+          const dx = x - c.x;
+          const dy = y - c.y;
+          const d2 = dx * dx + dy * dy;
+          return sum + (c.r * c.r) / d2;
+        }, 0);
 
-          if (d2 < closestD2) {
-            closestD2 = d2;
-            closestColor = [c.red, c.green, c.blue];
-          }
-        }
-        if (sum > SUM_THRESHOLD) {
-          const a = s * 0.65;
-          context.save();
-          context.fillStyle = '#2E40FB';
-          context.fillRect(x - a / 2, y - a / 2, a, a);
-          context.restore();
-        }
+        // Draw the pixel
+        // if (sum > SUM_THRESHOLD) {
+        const a = s * settings.size;
+        context.save();
+        context.fillStyle = scale(sum);
+        context.fillRect(x - a / 2, y - a / 2, a, a);
+        context.restore();
       },
     });
   };
