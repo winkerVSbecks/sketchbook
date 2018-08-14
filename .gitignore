@@ -73,4 +73,5 @@ typings/
 .serverless
 
 tmp
-renders
+site/renders
+dist
