@@ -3,31 +3,33 @@ import { Container, Box } from 'rebass';
 import Keyboard from '../components/Keyboard';
 import Toolbar from '../components/Toolbar';
 import Footer from '../components/Footer';
+import routes from './_config';
 
 class App extends React.Component {
+  state = { index: 0 };
+
   navigate = ({ forward } = { forward: true }) => {
-    const { location, routes, history } = this.props;
-    const index = routes.findIndex(
-      route => route.path.toLowerCase() === location.pathname.toLowerCase(),
-    );
+    const { index } = this.state;
 
     const next = forward
       ? index === routes.length - 1
-        ? routes[0]
-        : routes[index + 1]
+        ? 0
+        : index + 1
       : index === 0
-        ? routes[routes.length - 1]
-        : routes[index - 1];
+        ? routes.length - 1
+        : index - 1;
 
-    history.push(next.path);
+    this.setState({ index: next });
+  };
+
+  goTo = name => {
+    const index = routes.findIndex(route => route.name === name);
+    this.setState({ index });
   };
 
   render() {
-    const { location, render, routes } = this.props;
-
-    const route = routes.find(
-      route => route.path.toLowerCase() === location.pathname.toLowerCase(),
-    );
+    const { render } = this.props;
+    const { index } = this.state;
 
     return (
       <Box bg="black">
@@ -40,15 +42,18 @@ class App extends React.Component {
           }}
         >
           <Toolbar
-            name={route.name}
+            name={routes[index] ? routes[index].name : ''}
             onLeft={() => this.navigate({ forward: false })}
             onRight={() => this.navigate()}
+            onHome={() => this.goTo('index')}
           />
           <Keyboard
             onLeft={() => this.navigate({ forward: false })}
             onRight={() => this.navigate()}
           />
-          <Box flex="1 1 auto">{render({ routes })}</Box>
+          <Box flex="1 1 auto">
+            {render({ routes, index, goTo: this.goTo })}
+          </Box>
           <Footer />
         </Container>
       </Box>

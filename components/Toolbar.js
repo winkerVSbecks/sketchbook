@@ -1,23 +1,18 @@
 import React from 'react';
-import {
-  Toolbar,
-  NavLink,
-  Heading,
-  Box,
-  Caps,
-  ButtonTransparent,
-} from 'rebass';
+import { Toolbar, NavLink, Text, Box, Caps } from 'rebass';
 import { Arrow } from 'reline';
-import { Link } from 'react-router-dom';
 
-export default ({ name, onLeft, onRight }) => (
+export default ({ name, onLeft, onRight, onHome }) => (
   <Toolbar px={0} mb={5}>
-    <NavLink is={Link} px={0} to="/">
+    <NavLink px={0} onClick={onHome}>
       <Caps fontWeight="bold">sketchbook</Caps>
     </NavLink>
     <Box mx="auto" />
-    <NavLink px={4}>{name === 'index' ? '' : name}</NavLink>
-    <ButtonTransparent
+    <Text fontWeight="bold" fontSize={1} px={4}>
+      {name === 'index' ? '' : name}
+    </Text>
+    <NavLink
+      bg="transparent"
       onClick={onLeft}
       focus={{
         outline: 'none',
@@ -26,8 +21,9 @@ export default ({ name, onLeft, onRight }) => (
       }}
     >
       <Arrow left />
-    </ButtonTransparent>
-    <ButtonTransparent
+    </NavLink>
+    <NavLink
+      bg="transparent"
       onClick={onRight}
       focus={{
         outline: 'none',
@@ -36,6 +32,6 @@ export default ({ name, onLeft, onRight }) => (
       }}
     >
       <Arrow />
-    </ButtonTransparent>
+    </NavLink>
   </Toolbar>
 );

@@ -9,8 +9,10 @@
     "gif": "canvas-sketch-gif tmp/ --fps=24",
     "postgif": "rm -rf tmp/",
     "site": "x0 site --open",
-    "build": "x0 build site",
-    "deploy": "gh-pages -d dist"
+    "build": "BUILD_ENV=production x0 build site",
+    "predeploy": "cp -r site/renders dist/renders",
+    "deploy": "gh-pages -d dist",
+    "postdeploy": "rm -rf dist/renders"
   },
   "keywords": [],
   "author": "",
@@ -26,13 +28,16 @@
     "ramda": "^0.25.0",
     "rebass": "^2.1.0",
     "reline": "^1.0.0-beta.3",
-    "simplex-noise": "^2.4.0"
+    "simplex-noise": "^2.4.0",
+    "styled-components": "^3.4.2"
   },
   "devDependencies": {
     "@compositor/x0": "^6.0.3",
     "gh-pages": "^1.2.0"
   },
   "x0": {
-    "title": "Sketchbook"
+    "title": "Sketchbook",
+    "basename": "/sketchbook",
+    "template": "./html.js"
   }
 }
