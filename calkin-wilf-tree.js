@@ -10,11 +10,10 @@ const settings = {
   dimensions: [800, 600],
   scaleToView: true,
   playbackRate: 'throttle',
-  fps: 1,
+  fps: 24,
 };
 
-let steps;
-let clrs;
+let steps, drawn, clrs;
 
 // Each vertex a/b has two children:
 // (a+b)/b and a/(a+b)
@@ -63,26 +62,30 @@ canvasSketch(() => {
     render({ context, frame, width, height, playhead, time }) {
       const activeStep = Math.floor(time) - 1;
 
+      context.clearRect(0, 0, width, height);
+      context.fillStyle = '#111322';
+      context.fillRect(0, 0, width, height);
+
       clrs = palette();
       context.textAlign = 'center';
       context.textBaseline = 'middle';
       context.strokeStyle = clrs[0];
 
-      steps[activeStep] &&
-        steps[activeStep].forEach(node => {
+      steps[activeStep] && drawn.push(steps[activeStep]);
+
+      drawn.forEach(step => {
+        step.forEach(node => {
           node();
         });
+      });
     },
     begin({ context, width, height }) {
       clrs = palette();
+      drawn = [];
       steps = range(DEPTH + 1).reduce(
         (acc, idx) => ({ ...acc, [idx]: [] }),
         {},
       );
-
-      context.clearRect(0, 0, width, height);
-      context.fillStyle = '#111322';
-      context.fillRect(0, 0, width, height);
 
       drawCalkinWilf(context)(
         [width / 4, (height * 1.5) / 4],

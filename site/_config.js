@@ -83,4 +83,9 @@ export default [
       'renders/vector-field-uni.gif',
     ],
   },
+  {
+    name: 'Calkin Wilf Tree',
+    featured: 'renders/calkin-wilf-tree.gif',
+    imgs: ['renders/calkin-wilf-tree.gif'],
+  },
 ];
