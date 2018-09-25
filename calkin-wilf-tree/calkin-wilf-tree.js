@@ -12,15 +12,17 @@ const settings = {
   fps: 24,
 };
 
-const clrs = chroma
-  .cubehelix()
+const DEPTH = 6;
+
+// prettier-ignore
+const clrs = chroma.cubehelix()
   .start(randomNumber(0, 360))
   .rotations(-0.35)
   .gamma(0.7)
   .lightness([0.4, 0.8])
-  .scale()
+.scale()
   .correctLightness()
-  .colors(8);
+  .colors(DEPTH + 2);
 
 // Each vertex a/b has two children:
 // (a+b)/b and a/(a+b)
@@ -43,7 +45,7 @@ function drawCalkinWilf(context) {
       drawLine('BOTTOM', context, [x, y], [w, h], [f, l]);
     }
 
-    if (d < 6) {
+    if (d < DEPTH) {
       const [A, B] = fractions([a, b]);
       const nDirection = direction === 'HORIZONTAL' ? 'VERTICAL' : 'HORIZONTAL';
       const nDimensions = [w * 0.667, h * 0.667];
