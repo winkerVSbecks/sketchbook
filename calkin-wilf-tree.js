@@ -1,7 +1,6 @@
 const canvasSketch = require('canvas-sketch');
 const chroma = require('chroma-js');
-const { randomNumber, range } = require('../math');
-const Tree = require('./tree');
+const { randomNumber, range } = require('./math');
 
 const DEPTH = 6;
 
