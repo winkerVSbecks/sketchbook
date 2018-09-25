@@ -1,6 +1,6 @@
 const canvasSketch = require('canvas-sketch');
 const chroma = require('chroma-js');
-const { randomNumber } = require('../math');
+const { randomNumber, range } = require('../math');
 const Tree = require('./tree');
 
 const settings = {
@@ -13,6 +13,7 @@ const settings = {
 };
 
 const DEPTH = 6;
+const steps = range(6).reduce((acc, idx) => ({ ...acc, [acc[idx]]: [] }), {});
 
 // prettier-ignore
 const clrs = chroma.cubehelix()
@@ -46,7 +47,7 @@ function drawCalkinWilf(context) {
     }
 
     if (d < DEPTH) {
-      const [A, B] = fractions([a, b]);
+      const [nA, nB] = fractions([a, b]);
       const nDirection = direction === 'HORIZONTAL' ? 'VERTICAL' : 'HORIZONTAL';
       const nDimensions = [w * 0.667, h * 0.667];
       const nF = f * 0.8;
@@ -54,23 +55,22 @@ function drawCalkinWilf(context) {
       const nD = d + 1;
 
       if (direction === 'HORIZONTAL') {
-        calkinWilf(nDimensions, A, nDirection, [x - w, y], [nF, nL], nD);
-        calkinWilf(nDimensions, B, nDirection, [x + w, y], [nF, nL], nD);
+        calkinWilf(nDimensions, nA, nDirection, [x - w, y], [nF, nL], nD);
+        calkinWilf(nDimensions, nB, nDirection, [x + w, y], [nF, nL], nD);
       } else {
-        calkinWilf(nDimensions, A, nDirection, [x, y - h], [nF, nL], nD);
-        calkinWilf(nDimensions, B, nDirection, [x, y + h], [nF, nL], nD);
+        calkinWilf(nDimensions, nA, nDirection, [x, y - h], [nF, nL], nD);
+        calkinWilf(nDimensions, nB, nDirection, [x, y + h], [nF, nL], nD);
       }
     }
   };
 }
 
 canvasSketch(() => {
-  console.clear();
+  // console.clear();
 
   return {
     render({ context, frame, width, height, playhead }) {},
     begin({ context, width, height }) {
-      steps = [];
       context.clearRect(0, 0, width, height);
       context.fillStyle = '#111322';
       context.fillRect(0, 0, width, height);
