@@ -69,7 +69,9 @@ const sketch = () => ({ context, width, height, playhead }) => {
     .forEach(pts => {
       context.lineWidth = width * 0.002;
       context.lineJoin = 'bevel';
-      context.fillStyle = clr(random.noise3D(pts[2][0], pts[2][1], playhead));
+      context.fillStyle = clr(random.noise3D(pts[2][0], pts[2][1], playhead))
+        .alpha(0.75)
+        .css();
       context.strokeStyle = clr(0);
       context.lineWidth = 2;
       drawShape(context, pts.map(([x, y]) => [x, y]));
