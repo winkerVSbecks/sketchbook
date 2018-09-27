@@ -88,4 +88,17 @@ export default [
     featured: 'renders/calkin-wilf-tree.gif',
     imgs: ['renders/calkin-wilf-tree.gif'],
   },
+  {
+    name: 'Triangle Mesh',
+    featured: 'renders/triangle-mesh6.png',
+    imgs: [
+      'renders/triangle-mesh1.png',
+      'renders/triangle-mesh2.png',
+      'renders/triangle-mesh3.png',
+      'renders/triangle-mesh4.png',
+      'renders/triangle-mesh5.png',
+      'renders/triangle-mesh6.png',
+      'renders/triangle-mesh7.png',
+    ],
+  },
 ];
