@@ -14,18 +14,28 @@ function rectGrid({
   };
 
   let pts = [];
+  const step = {
+    x:
+      lerp(_padding.x, size.x - _padding.x, 1 / (resolution.x - 1)) -
+      _padding.x,
+    y:
+      lerp(_padding.y, size.y - _padding.y, 1 / (resolution.y - 1)) -
+      _padding.y,
+  };
 
   for (let y = 0; y < resolution.y; y++) {
     for (let x = 0; x < resolution.x; x++) {
       // get a 0..1 UV coordinate
       const u = resolution.x <= 1 ? 0.5 : x / (resolution.x - 1);
       const v = resolution.y <= 1 ? 0.5 : y / (resolution.y - 1);
+
       const pt = {
         x: lerp(_padding.x, size.x - _padding.x, u),
         y: lerp(_padding.y, size.y - _padding.y, v),
         s: tileSize,
         xIdx: x,
         yIdx: y,
+        step,
       };
 
       pts.push(pt);

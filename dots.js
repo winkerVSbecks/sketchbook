@@ -1,122 +1,80 @@
 const canvasSketch = require('canvas-sketch');
-const { lerpFrames } = require('canvas-sketch-util/math');
 const { range } = require('canvas-sketch-util/random');
 const R = require('ramda');
-var TWEEN = require('@tweenjs/tween.js');
+const quintInOut = require('eases/quint-in-out');
+const ticker = require('tween-ticker')({ defaultEase: quintInOut });
+const Tween = require('tween-chain');
 const chroma = require('chroma-js');
 const { rectGrid } = require('./grid');
 const { drawShape } = require('./geometry');
 
 const settings = {
-  dimensions: [2048, 2048],
+  dimensions: [800, 800],
   animate: true,
   duration: 5,
   scaleToView: true,
-  // playbackRate: 'throttle',
-  // fps: 24,
+  fps: 60,
 };
-
-let pts = [];
-var dots = new TWEEN.Group();
 
 const sketch = () => {
   console.clear();
+  let pts = [];
 
-  return ({ context, width, height, playhead, frame, duration }) => {
-    context.fillStyle = '#000';
-    context.fillRect(0, 0, width, height);
-    context.lineJoin = 'bevel';
-
-    // Create a grid
-    if (frame === 1) {
+  return {
+    begin({ context, width, height }) {
+      context.fillStyle = '#000';
+      context.fillRect(0, 0, width, height);
+      context.lineJoin = 'bevel';
+      // Create a grid
       pts = rectGrid({
         size: { x: width, y: height },
         resolution: { x: 16, y: 16 },
         padding: { x: 0.15, y: 0.15 },
-      }).reduce((acc, { x, y, s, yIdx, xIdx }) => {
+      }).reduce((acc, { x, y, s, step, yIdx, xIdx }) => {
         const even = yIdx % 2 === 0;
-        const offsetEven = even ? s.x / 2 : 0;
-        const offsetOdd = !even ? s.x / 2 : 0;
+        const offsetX = even ? step.x / 2 : 0;
+        const offsetY = even ? step.y : -step.y;
+        const r = s.x / 8;
+        const pt = { x: x - range(step.x, step.x * 8), y, opacity: 0, r };
 
-        const pt = { x: x - range(s.x, s.x * 8), y, opacity: 0, r: 6 };
+        const chain = Tween()
+          .chain(pt, { x, opacity: 1, r, duration: 1.6 })
+          .then(pt, { x: x + offsetX, r: r * 1.2, duration: 0.4 })
+          .then(pt, {
+            x: x,
+            y: y + offsetY,
+            delay: 0.4,
+            duration: 0.6,
+          })
+          .then(pt, { y, r: r * 1.6, delay: 0.8, duration: 0.4 })
+          .then(pt, {
+            opacity: 0,
+            delay: 0.4,
+            duration: 0.3,
+          });
 
-        const fadeInRight = new TWEEN.Tween(pt, dots)
-          .to({ x, opacity: 1, r: 6 }, 1200)
-          .easing(TWEEN.Easing.Quintic.Out);
-
-        const moveDown = new TWEEN.Tween(pt, dots)
-          .to({ x: `+${offsetEven}`, r: 12 }, 400)
-          .easing(TWEEN.Easing.Quintic.InOut);
-
-        const twistBack = new TWEEN.Tween(pt, dots)
-          .delay(200)
-          .to({ x: `${even ? '-' : '+'}${s.x / 2}` }, 300)
-          .easing(TWEEN.Easing.Quintic.InOut);
-
-        const twistForward = new TWEEN.Tween(pt, dots)
-          .delay(200)
-          .to(
-            {
-              // x: `+${s.x / 2}`,
-              x: `${even ? '-' : '+'}${s.x / 2}`,
-              // y: `${even ? '+' : '-'}${s.y}`,
-            },
-            300,
-          )
-          .easing(TWEEN.Easing.Quintic.InOut);
-
-        const twist = twistForward.chain(twistBack);
-
-        const reset = new TWEEN.Tween(pt, dots)
-          .delay(400)
-          .to({ x, y, r: 6 }, 200)
-          .easing(TWEEN.Easing.Quintic.InOut);
-
-        const fadeOut = new TWEEN.Tween(pt, dots)
-          .delay(400)
-          .to({ opacity: 0, y: y + s.y / 4 }, 800)
-          .easing(TWEEN.Easing.Quintic.InOut);
-
-        fadeInRight
-          .chain(moveDown.chain(twist.chain(reset.chain(fadeOut))))
-          .start();
+        ticker.push(chain);
 
         return acc.concat([pt]);
       }, []);
-    }
+    },
+    render({ context, width, height, deltaTime }) {
+      context.fillStyle = '#000';
+      context.fillRect(0, 0, width, height);
+      context.lineJoin = 'bevel';
 
-    dots.update();
+      ticker.tick();
 
-    pts.forEach(({ x, y, r, opacity }) => {
-      context.globalAlpha = opacity;
+      pts.forEach(({ x, y, r, opacity }) => {
+        context.globalAlpha = opacity;
 
-      context.fillStyle = '#fff';
-      context.beginPath();
-      context.arc(x, y, r, 0, 2 * Math.PI);
-      context.fill();
-    });
-
-    // pts.forEach((polyline, idx) => {
-    //   const scale = beat(playhead, 10, 2);
-    //   const loc = [
-    //     polyline[0][0] + (polyline[1][0] - polyline[0][0]) * scale,
-    //     polyline[0][1] + (polyline[1][1] - polyline[0][1]) * scale,
-    //   ];
-
-    //   const r = 6 + 6 * Math.sin(Math.PI * scale); //6 + 6 * scale;
-
-    //   context.fillStyle = '#fff';
-    //   context.globalAlpha = scale;
-    //   context.beginPath();
-    //   context.arc(...loc, r, 0, 2 * Math.PI);
-    //   context.fill();
-    // });
+        context.fillStyle = '#fff';
+        context.beginPath();
+        context.arc(x, y, r, 0, 2 * Math.PI);
+        context.fill();
+      });
+    },
   };
 };
 
 canvasSketch(sketch, settings);
-
-function beat(value, intensity = 2, frequency = 2) {
-  const v = Math.atan(Math.sin(value * Math.PI * frequency) * intensity);
-  return (v + Math.PI / 2) / Math.PI;
-}

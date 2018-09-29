@@ -101,4 +101,9 @@ export default [
       'renders/triangle-mesh7.png',
     ],
   },
+  {
+    name: 'Dots',
+    featured: 'renders/dots.gif',
+    imgs: ['renders/dots.gif'],
+  },
 ];
