@@ -1,7 +1,7 @@
 const canvasSketch = require('canvas-sketch');
 const { range } = require('canvas-sketch-util/random');
 const R = require('ramda');
-const quintInOut = require('eases/quint-in-out');
+const { quintInOut, backInOut, quintIn } = require('eases');
 const ticker = require('tween-ticker')({ defaultEase: quintInOut });
 const Tween = require('tween-chain');
 const chroma = require('chroma-js');
@@ -11,7 +11,7 @@ const { drawShape } = require('./geometry');
 const settings = {
   dimensions: [800, 800],
   animate: true,
-  duration: 5,
+  duration: 4,
   scaleToView: true,
   fps: 60,
 };
@@ -38,15 +38,31 @@ const sketch = () => {
         const pt = { x: x - range(step.x, step.x * 8), y, opacity: 0, r };
 
         const chain = Tween()
+          // fade in right
           .chain(pt, { x, opacity: 1, r, duration: 1.6 })
-          .then(pt, { x: x + offsetX, r: r * 1.2, duration: 0.4 })
+          // move right
+          .then(pt, {
+            x: x + offsetX,
+            r: r * 1.6,
+            duration: 0.4,
+            ease: backInOut,
+          })
+          // twist
           .then(pt, {
             x: x,
             y: y + offsetY,
             delay: 0.4,
             duration: 0.6,
           })
-          .then(pt, { y, r: r * 1.6, delay: 0.8, duration: 0.4 })
+          // back to grid
+          .then(pt, {
+            y,
+            r,
+            delay: 0.8,
+            duration: 0.6,
+            ease: quintIn,
+          })
+          // fade out
           .then(pt, {
             opacity: 0,
             delay: 0.4,
