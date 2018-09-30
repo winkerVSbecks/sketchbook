@@ -103,7 +103,12 @@ export default [
   },
   {
     name: 'Dots',
-    featured: 'renders/dots.gif',
-    imgs: ['renders/dots.gif'],
+    featured: 'renders/dots2.gif',
+    imgs: [
+      'renders/dots.gif',
+      'renders/dots2.gif',
+      'renders/dots3.gif',
+      'renders/dots4.gif',
+    ],
   },
 ];
