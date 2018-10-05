@@ -1,4 +1,22 @@
+const { lerpArray } = require('canvas-sketch-util/math');
 const { range, degreesToRadians } = require('./math');
+
+function trianglePts(side, [cx, cy], count) {
+  const h = side * (Math.sqrt(3) / 2);
+  return range(count).reduce(
+    (acc, idx) =>
+      acc.concat([
+        lerpArray([cx, cy - h / 2], [cx - side / 2, cy + h / 2], idx / count),
+        lerpArray(
+          [cx - side / 2, cy + h / 2],
+          [cx + side / 2, cy + h / 2],
+          idx / count,
+        ),
+        lerpArray([cx + side / 2, cy + h / 2], [cx, cy - h / 2], idx / count),
+      ]),
+    [],
+  );
+}
 
 function drawEqTriangle(context, side, cx, cy, color) {
   const h = side * (Math.sqrt(3) / 2);
@@ -58,4 +76,5 @@ module.exports = {
   translateAll,
   drawShape,
   range,
+  trianglePts,
 };
