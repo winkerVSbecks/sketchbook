@@ -90,25 +90,15 @@ const sketch = () => {
     //   point(context, v);
     // });
 
-    context.shadowBlur = 15;
+    context.shadowBlur = 25;
     context.shadowColor = '#fff';
 
     edges.forEach(([a, b]) => {
       line(context, projected[a], projected[b], {
         lineWidth: 1,
-        stroke: '#39FB3D',
+        stroke: chroma.random(),
       });
     });
-
-    context.translate(-width / 2, -height / 2);
-    context.shadowBlur = 25;
-    context.shadowColor = '#fff';
-    linspace(height / 2, true)
-      .filter((_, idx) => idx % 2 === 0)
-      .forEach(v => {
-        context.fillStyle = 'rgba(255, 255, 255, 0.05)';
-        context.fillRect(0, height * v, width, 2);
-      });
 
     // angle += 0.01;
   };
