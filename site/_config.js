@@ -111,4 +111,24 @@ export default [
       'renders/dots4.gif',
     ],
   },
+  {
+    name: 'Supershape',
+    featured: 'renders/supershape.gif',
+    imgs: [
+      'renders/supershape.gif',
+      'renders/supershape2.gif',
+      'renders/supershape3.gif',
+    ],
+  },
+  {
+    name: 'Projection',
+    featured: 'renders/projection1.gif',
+    imgs: [
+      'renders/projection1.gif',
+      'renders/projection2.gif',
+      'renders/projection3.gif',
+      'renders/projection4.gif',
+      'renders/projection5.gif',
+    ],
+  },
 ];
