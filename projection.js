@@ -42,8 +42,17 @@ const sketch = () => {
     [3, 7],
   ];
 
+  const clr = chroma
+    .cubehelix()
+    // .start(200)
+    .rotations(6)
+    .lightness([0.3, 1])
+    .scale()
+    .correctLightness();
+
   return ({ context, width, height, playhead }) => {
-    const angle = beat(playhead, 0.5) * 2 * Math.PI;
+    // const angle = beat(playhead, 0.5) * 2 * Math.PI;
+    const angle = Math.PI / 2 + (Math.sin(playhead * Math.PI) * Math.PI) / 2;
     // prettier-ignore
     const rotationZ = [
       [Math.cos(angle / 2), -Math.sin(angle / 2), 0],
@@ -90,13 +99,13 @@ const sketch = () => {
     //   point(context, v);
     // });
 
-    context.shadowBlur = 25;
-    context.shadowColor = '#fff';
+    // context.shadowBlur = 25;
+    // context.shadowColor = '#fff';
 
     edges.forEach(([a, b]) => {
       line(context, projected[a], projected[b], {
         lineWidth: 1,
-        stroke: chroma.random(),
+        stroke: clr(playhead),
       });
     });
 
