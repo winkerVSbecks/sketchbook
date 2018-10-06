@@ -42,14 +42,6 @@ const sketch = () => {
     [3, 7],
   ];
 
-  const clr = chroma
-    .cubehelix()
-    // .start(200)
-    .rotations(6)
-    .lightness([0.3, 1])
-    .scale()
-    .correctLightness();
-
   return ({ context, width, height, playhead }) => {
     // const angle = beat(playhead, 0.5) * 2 * Math.PI;
     const angle = Math.PI / 2 + (Math.sin(playhead * Math.PI) * Math.PI) / 2;
@@ -105,7 +97,7 @@ const sketch = () => {
     edges.forEach(([a, b]) => {
       line(context, projected[a], projected[b], {
         lineWidth: 1,
-        stroke: clr(playhead),
+        stroke: chroma.random(),
       });
     });
 
