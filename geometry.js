@@ -68,6 +68,27 @@ function drawShape(context, [start, ...pts], closed = true) {
   }
 }
 
+function point(context, [x, y], size = 3, { fill = '#fff' } = {}) {
+  context.fillStyle = fill;
+  context.beginPath();
+  context.arc(x, y, size, 0, 2 * Math.PI, false);
+  context.fill();
+}
+
+function line(
+  context,
+  [x1, y1],
+  [x2, y2],
+  { lineWidth = 1, stroke = '#fff' } = {},
+) {
+  context.strokeStyle = stroke;
+  context.lineWidth = lineWidth;
+  context.beginPath();
+  context.moveTo(x1, y1);
+  context.lineTo(x2, y2);
+  context.stroke();
+}
+
 module.exports = {
   drawEqTriangle,
   arcs,
@@ -77,4 +98,6 @@ module.exports = {
   drawShape,
   range,
   trianglePts,
+  point,
+  line,
 };

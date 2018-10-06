@@ -26,7 +26,6 @@
     "hsluv": "0.0.3",
     "itsy-bitsy-data-structures": "^1.0.0",
     "lerp": "^1.0.3",
-    "matrix-js": "^1.4.0",
     "p5": "^0.7.1",
     "ramda": "^0.25.0",
     "rebass": "^2.1.0",
