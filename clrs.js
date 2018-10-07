@@ -12,3 +12,20 @@ const clrs = ['#3333ff', '#fc7f95', '#fbfc6e', '#55f9fc', '#fefefc'];
 // spectrum.map(c => {
 //   console.log('%c █', `color: ${c}`);
 // });
+
+function hueCycle(hueStart, t) {
+  const hue = (t + hueStart) % 1;
+  const sat = 0.75;
+  const light = 0.5;
+  const hsl = [
+    Math.floor(hue * 360),
+    `${Math.floor(100 * sat)}%`,
+    `${Math.floor(100 * light)}%`,
+  ].join(', ');
+
+  return `hsl(${hsl})`;
+}
+
+module.exports = {
+  hueCycle,
+};

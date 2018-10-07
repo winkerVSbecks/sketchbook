@@ -1,7 +1,5 @@
 const canvasSketch = require('canvas-sketch');
 const chroma = require('chroma-js');
-const R = require('ramda');
-const { linspace } = require('canvas-sketch-util/math');
 const { point, line } = require('./geometry');
 const { matrixMultiply } = require('./matrix');
 

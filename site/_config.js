@@ -129,6 +129,12 @@ export default [
       'renders/projection3.gif',
       'renders/projection4.gif',
       'renders/projection5.gif',
+      'renders/projection6.gif',
     ],
+  },
+  {
+    name: 'Hypercube',
+    featured: 'renders/hypercube2.gif',
+    imgs: ['renders/hypercube1.gif', 'renders/hypercube2.gif'],
   },
 ];
