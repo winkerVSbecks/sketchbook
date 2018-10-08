@@ -1,23 +1,20 @@
 const canvasSketch = require('canvas-sketch');
 const chroma = require('chroma-js');
 const Random = require('canvas-sketch-util/random');
-const { point, line, drawShape, trail } = require('./geometry');
-const { matrixMultiply } = require('./matrix');
-const { hueCycle } = require('./clrs');
-const { beat } = require('./easings');
+const { point, line, drawShape } = require('./geometry');
 
 const settings = {
   dimensions: [800, 600],
   animate: true,
-  duration: 12,
+  duration: 20,
   scaleToView: true,
 };
 
 // const clr = chroma.scale('YlGnBu').colors(3);
-const clr = ['#fff', '#999', '#333'];
+// const clr = ['#fff', '#999', '#333'];
 // const clr = ['#fff', '#ffe2e2', '#99ddcc'];
 // const clr = ['#fbfbfb', '#808b97', '#5ba19b'];
-// const clr = ['#fbfbfb', '#f3d179', '#808b97'];
+const clr = ['#fbfbfb', '#f3d179', '#808b97'];
 // const clr = ['#fff', '#9a9b94', '#52524e'];
 
 /**
@@ -27,11 +24,6 @@ const clr = ['#fff', '#999', '#333'];
  */
 const sketch = () => {
   console.clear();
-  // Choose a new starting hues
-  Random.setSeed(Random.getRandomSeed());
-  let hueStart1 = Random.value();
-  let hueStart2 = Random.value() * Random.value();
-
   let pendulum = {};
 
   return {
@@ -66,40 +58,40 @@ const sketch = () => {
       context.fillRect(0, 0, width, height);
       context.translate(width / 2, height / 2);
 
-      // Draw Pendulum
-      line(context, [0, 0], location1, {
-        lineWidth: 1,
-        stroke: clr[1],
-      });
-      line(context, location1, location2, {
-        lineWidth: 1,
-        stroke: clr[1],
-      });
-      point(context, [0, 0], 2, { fill: clr[1] });
-      point(context, location1, 6, { fill: clr[1] });
-      point(context, location2, 6, { fill: clr[2] });
+      // // Draw Pendulum
+      // line(context, [0, 0], location1, {
+      //   lineWidth: 1,
+      //   stroke: clr[1],
+      // });
+      // line(context, location1, location2, {
+      //   lineWidth: 1,
+      //   stroke: clr[1],
+      // });
+      // point(context, [0, 0], 2, { fill: clr[1] });
+      // point(context, location1, 6, { fill: clr[1] });
+      // point(context, location2, 6, { fill: clr[2] });
 
-      // // Draw Trails
-      // pendulum.trail1.push(location1);
-      // pendulum.trail2.push(location2);
+      // Draw Trails
+      pendulum.trail1.push(location1);
+      pendulum.trail2.push(location2);
 
-      // if (pendulum.trail1.length > pendulum.pathLength) {
-      //   pendulum.trail1.shift();
-      // }
-      // if (pendulum.trail2.length > pendulum.pathLength) {
-      //   pendulum.trail2.shift();
-      // }
+      if (pendulum.trail1.length > pendulum.pathLength) {
+        pendulum.trail1.shift();
+      }
+      if (pendulum.trail2.length > pendulum.pathLength) {
+        pendulum.trail2.shift();
+      }
 
-      // context.lineWidth = 4;
-      // context.lineCap = 'round';
-      // // Motion path of top rod
-      // context.strokeStyle = clr[1]; //hueCycle(hueStart1, playhead, 0.75, 0.75 * fade);
-      // drawShape(context, pendulum.trail1, false);
-      // context.stroke();
-      // // Motion path of bottom rod
-      // context.strokeStyle = clr[2]; //hueCycle(hueStart2, playhead, 0.75, 0.75 * fade);
-      // drawShape(context, pendulum.trail2, false);
-      // context.stroke();
+      context.lineWidth = 6;
+      context.lineCap = 'round';
+      // Motion path of top rod
+      context.strokeStyle = clr[1];
+      drawShape(context, pendulum.trail1, false);
+      context.stroke();
+      // Motion path of bottom rod
+      context.strokeStyle = clr[2];
+      drawShape(context, pendulum.trail2, false);
+      context.stroke();
 
       // Update acceleration ➡ velocity ➡ angle
       const a1Acc = angularAccTop(pendulum);

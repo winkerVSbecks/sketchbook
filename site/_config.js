@@ -144,6 +144,7 @@ export default [
       'renders/double-pendulum.gif',
       'renders/double-pendulum3.gif',
       'renders/double-pendulum4.gif',
+      'renders/double-pendulum6.gif',
       'renders/double-pendulum2.gif',
       'renders/double-pendulum5.gif',
     ],
