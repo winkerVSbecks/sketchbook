@@ -137,4 +137,15 @@ export default [
     featured: 'renders/hypercube2.gif',
     imgs: ['renders/hypercube1.gif', 'renders/hypercube2.gif'],
   },
+  {
+    name: 'Double Pendulum',
+    featured: 'renders/double-pendulum3.gif',
+    imgs: [
+      'renders/double-pendulum.gif',
+      'renders/double-pendulum3.gif',
+      'renders/double-pendulum4.gif',
+      'renders/double-pendulum2.gif',
+      'renders/double-pendulum5.gif',
+    ],
+  },
 ];

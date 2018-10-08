@@ -13,10 +13,8 @@ const clrs = ['#3333ff', '#fc7f95', '#fbfc6e', '#55f9fc', '#fefefc'];
 //   console.log('%c █', `color: ${c}`);
 // });
 
-function hueCycle(hueStart, t) {
+function hueCycle(hueStart, t, sat = 0.75, light = 0.5) {
   const hue = (t + hueStart) % 1;
-  const sat = 0.75;
-  const light = 0.5;
   const hsl = [
     Math.floor(hue * 360),
     `${Math.floor(100 * sat)}%`,
