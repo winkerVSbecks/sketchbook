@@ -149,4 +149,14 @@ export default [
       'renders/double-pendulum5.gif',
     ],
   },
+  {
+    name: 'So Many Pendulums',
+    featured: 'renders/so-many-pendulums.gif',
+    imgs: [
+      'renders/so-many-pendulums.gif',
+      'renders/so-many-pendulums2.gif',
+      'renders/so-many-pendulums3.gif',
+      'renders/so-many-pendulums4.gif',
+    ],
+  },
 ];
