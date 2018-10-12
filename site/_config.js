@@ -159,4 +159,13 @@ export default [
       'renders/so-many-pendulums4.gif',
     ],
   },
+  {
+    name: '10 Print',
+    featured: 'renders/10-print3.gif',
+    imgs: [
+      'renders/10-print.gif',
+      'renders/10-print2.gif',
+      'renders/10-print3.gif',
+    ],
+  },
 ];
