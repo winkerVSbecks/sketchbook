@@ -168,4 +168,26 @@ export default [
       'renders/10-print3.gif',
     ],
   },
+  {
+    name: 'Lissajous',
+    featured: 'renders/lissajous3.gif',
+    imgs: [
+      'renders/lissajous.gif',
+      'renders/lissajous3.gif',
+      'renders/lissajous2.gif',
+      'renders/lissajous4.gif',
+      'renders/lissajous5.gif',
+      'renders/lissajous6.gif',
+      'renders/lissajous7.gif',
+      'renders/lissajous8.gif',
+      'renders/lissajous9.gif',
+      'renders/lissajous10.gif',
+    ],
+  },
+  {
+    name: 'Emojipocalypse',
+    featured: 'renders/emojipocalypse3.gif',
+    imgs: ['renders/emojipocalypse.gif', 'renders/emojipocalypse2.gif'],
+    vids: ['renders/emojipocalypse.mp4'],
+  },
 ];
