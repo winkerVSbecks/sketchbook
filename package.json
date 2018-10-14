@@ -10,8 +10,8 @@
     "postgif": "rm -rf tmp/",
     "site": "x0 site --open",
     "build": "BUILD_ENV=production x0 build site",
-    "postbuild": "cp -r site/renders dist/renders",
-    "deploy": "gh-pages -d dist",
+    "predeploy": "cp -r site/renders dist/renders",
+    "deploy": "netlify deploy --dir=dist --prod",
     "postdeploy": "rm -rf dist/renders"
   },
   "keywords": [],
@@ -41,7 +41,7 @@
   },
   "x0": {
     "title": "Sketchbook",
-    "basename": "/sketchbook",
+    "basename": "",
     "template": "./html.js"
   }
 }
