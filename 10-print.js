@@ -19,7 +19,7 @@ const sketch = () => {
 
   return {
     begin() {
-      gradient = pigments[10]; //Random.pick(pigments);
+      gradient = Random.pick(pigments);
       Random.permuteNoise();
     },
     render({ context, width, height, frame, playhead }) {
