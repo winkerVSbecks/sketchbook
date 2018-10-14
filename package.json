@@ -10,7 +10,7 @@
     "postgif": "rm -rf tmp/",
     "site": "x0 site --open",
     "build": "BUILD_ENV=production x0 build site",
-    "predeploy": "cp -r site/renders dist/renders",
+    "postbuild": "cp -r site/renders dist/renders",
     "deploy": "gh-pages -d dist",
     "postdeploy": "rm -rf dist/renders"
   },
