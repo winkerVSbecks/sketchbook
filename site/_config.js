@@ -135,7 +135,11 @@ export default [
   {
     name: 'Hypercube',
     featured: 'renders/hypercube2.gif',
-    imgs: ['renders/hypercube1.gif', 'renders/hypercube2.gif'],
+    imgs: [
+      'renders/hypercube1.gif',
+      'renders/hypercube2.gif',
+      'renders/hypercube3.gif',
+    ],
   },
   {
     name: 'Double Pendulum',
@@ -189,5 +193,14 @@ export default [
     featured: 'renders/emojipocalypse3.gif',
     imgs: ['renders/emojipocalypse.gif', 'renders/emojipocalypse2.gif'],
     vids: ['renders/emojipocalypse.mp4'],
+  },
+  {
+    name: 'Lorenz Attractor',
+    featured: 'renders/lorenz-attractor3.gif',
+    imgs: [
+      'renders/lorenz-attractor.gif',
+      'renders/lorenz-attractor2.gif',
+      'renders/lorenz-attractor3.gif',
+    ],
   },
 ];
