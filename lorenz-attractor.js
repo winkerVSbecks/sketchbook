@@ -8,7 +8,7 @@ const { hueCycle } = require('./clrs');
 const settings = {
   dimensions: [800, 600],
   animate: true,
-  duration: 20,
+  duration: 40,
   scaleToView: true,
 };
 
@@ -18,7 +18,6 @@ const sketch = () => {
   Random.setSeed(Random.getRandomSeed());
   // Choose a new starting hue
   let hueStart = Random.value();
-  // prettier-ignore
   const attractor = [];
 
   let x = 0.01;
@@ -52,8 +51,6 @@ const sketch = () => {
       [-Math.sin(angle), 0, Math.cos(angle)],
     ];
 
-    const distance = 2.25;
-
     let dt = 0.01;
     let dx = a * (y - x) * dt;
     let dy = (x * (b - z) - y) * dt;
@@ -71,8 +68,6 @@ const sketch = () => {
       rotated = matrixMultiply(rotationZ, rotated);
       const scaled = matrixMultiply(scale(5), rotated);
 
-      // Project from 3D to 2D
-      const w3d = 1 / (distance - scaled[2]);
       // prettier-ignore
       const projection2d = [
         [1, 0,   0],
@@ -91,31 +86,34 @@ const sketch = () => {
     const color = hueCycle(hueStart, playhead);
 
     context.strokeStyle = color;
-    context.lineWidth = 4;
+    context.lineWidth = 8;
     context.lineCap = 'round';
     context.lineJoin = 'round';
-    const [start, ...pts] = projected;
 
-    let prev = start;
-    const l = pts.length;
-    pts.forEach((pt, idx) => {
-      const color = hueCycle(hueStart, idx / l);
-      context.strokeStyle = color;
-      context.beginPath();
-      context.moveTo(...prev);
-      context.lineTo(...pt);
-      prev = pt;
-      context.stroke();
-    });
+    // // Rainbow version
+    // const [start, ...pts] = projected;
+    // let prev = start;
+    // const l = pts.length;
+    // pts.forEach((pt, idx) => {
+    //   const color = hueCycle(hueStart, idx / l);
+    //   context.strokeStyle = color;
+    //   context.beginPath();
+    //   context.moveTo(...prev);
+    //   context.lineTo(...pt);
+    //   prev = pt;
+    //   context.stroke();
+    // });
+
+    // Dancing version
+    drawShape(context, projected, false);
+    context.stroke();
+    if (attractor.length > 40) {
+      attractor.shift();
+    }
   };
 };
 
 canvasSketch(sketch, settings);
-
-function beat(value, intensity = 2, frequency = 2) {
-  const v = Math.atan(Math.sin(value * Math.PI * frequency) * intensity);
-  return (v + Math.PI / 2) / Math.PI;
-}
 
 function scale(v) {
   // prettier-ignore

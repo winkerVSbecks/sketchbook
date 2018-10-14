@@ -196,11 +196,13 @@ export default [
   },
   {
     name: 'Lorenz Attractor',
-    featured: 'renders/lorenz-attractor3.gif',
+    featured: 'renders/lorenz-attractor4.gif',
     imgs: [
       'renders/lorenz-attractor.gif',
       'renders/lorenz-attractor2.gif',
       'renders/lorenz-attractor3.gif',
+      'renders/lorenz-attractor4.gif',
+      'renders/lorenz-attractor5.gif',
     ],
   },
 ];
