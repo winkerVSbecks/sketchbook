@@ -205,4 +205,15 @@ export default [
       'renders/lorenz-attractor5.gif',
     ],
   },
+  {
+    name: 'Noisy Glyphs',
+    featured: 'renders/noisy-glyphs5.gif',
+    imgs: [
+      'renders/noisy-glyphs1.gif',
+      'renders/noisy-glyphs2.gif',
+      'renders/noisy-glyphs3.gif',
+      'renders/noisy-glyphs4.gif',
+      'renders/noisy-glyphs5.gif',
+    ],
+  },
 ];
