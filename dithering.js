@@ -8,7 +8,7 @@ const settings = {
 };
 
 const sketch = async ({ update }) => {
-  const image = await load('assets/baboon.jpg');
+  const image = await load('/some-image.png');
 
   update({
     dimensions: [image.width, image.height],
