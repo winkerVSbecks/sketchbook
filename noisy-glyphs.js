@@ -41,7 +41,7 @@ canvasSketch(() => {
         const scale = gridSize * 2;
         const n = Random.noise3D(x / scale, y / scale, time);
         const angle = mapRange(n, -1, 1, 0, 360);
-        const dir = Math.round(angle / 45); //=== 8 ? 0 : Math.round(angle / 45);
+        const dir = Math.round(angle / 45);
 
         // Draw
         context.font = `400 ${tileSize * 0.75}px 'Riforma LL'`;

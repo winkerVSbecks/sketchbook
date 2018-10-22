@@ -216,4 +216,18 @@ export default [
       'renders/noisy-glyphs5.gif',
     ],
   },
+  {
+    name: 'Dithering',
+    featured: 'renders/dithering4.png',
+    imgs: [
+      'renders/dithering1.png',
+      'renders/dithering2.png',
+      'renders/dithering3.png',
+      'renders/dithering4.png',
+      'renders/dithering5.png',
+      'renders/dithering6.png',
+      'renders/dithering7.png',
+      'renders/dithering8.png',
+    ],
+  },
 ];
