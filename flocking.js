@@ -2,6 +2,8 @@ const canvasSketch = require('canvas-sketch');
 const Random = require('canvas-sketch-util/random');
 const { mapRange, linspace } = require('canvas-sketch-util/math');
 const { Vector } = require('p5');
+const { drawShape } = require('./geometry');
+const { warm } = require('./clrs');
 
 const settings = {
   animate: true,
@@ -10,8 +12,12 @@ const settings = {
   scaleToView: true,
 };
 
+const CONFIG = {
+  neighbourDist: 50,
+  desiredSeparation: 25,
+};
+
 canvasSketch(() => {
-  Random.permuteNoise();
   console.clear();
 
   let flock = [];
@@ -20,17 +26,29 @@ canvasSketch(() => {
     begin({ width, height }) {
       flock = linspace(128).map(() => boidOf(width / 2, height / 2));
     },
-    render({ context, width, height }) {
+    render({ context, width, height, playhead }) {
       context.clearRect(0, 0, width, height);
-      context.fillStyle = '#000';
+      context.fillStyle = '#f1f8fd';
       context.fillRect(0, 0, width, height);
       const handleScreenBoundaries = handleBoundaries(width, height);
+
+      if (playhead > 0.9) {
+        context.globalAlpha = mapRange(playhead, 0.9, 1, 1, 0);
+      }
 
       flock.forEach(boid => {
         move(flock, boid);
         update(boid);
         handleScreenBoundaries(boid);
-        render(boid, context);
+        render(boid, context, width, height);
+
+        if (playhead > 0.8) {
+          boid.trailLength = Math.max(
+            Math.round(mapRange(playhead, 0.8, 0.9, 20, 1)),
+            0,
+          );
+          boid.trail.shift();
+        }
       });
     },
   };
@@ -38,17 +56,22 @@ canvasSketch(() => {
 
 /**
  * Boid
- * Based on Daniel Shiffman's code https://p5js.org/examples/simulate-flocking.html
- * and demonstration of Craig Reynolds' "Flocking" behavior http://www.red3d.com/cwr/boids/ Rules
+ * Based on Daniel Shiffman's code
+ *  https://p5js.org/examples/simulate-flocking.html
+ * and demonstration of Craig Reynolds' "Flocking" behavior
+ *  http://www.red3d.com/cwr/boids/ Rules
  */
 function boidOf(x, y) {
   return {
     acceleration: new Vector(0, 0),
     velocity: new Vector(Random.range(-1, 1), Random.range(-1, 1)),
     position: new Vector(x, y),
-    r: 3,
+    r: Random.range(2, 4),
     maxSpeed: 3,
     maxForce: 0.05,
+    trail: [],
+    trailLength: Random.range(25, 60),
+    color: Random.pick(warm),
   };
 }
 
@@ -79,6 +102,14 @@ function update(boid) {
   // Limit speed
   boid.velocity.limit(boid.maxSpeed);
   boid.position.add(boid.velocity);
+
+  // Trail
+  boid.trail.push([boid.position.x, boid.position.y]);
+
+  if (boid.trail.length > boid.trailLength) {
+    boid.trail.shift();
+  }
+
   // Reset acceleration to 0 each cycle
   boid.acceleration.mult(0);
 }
@@ -87,19 +118,26 @@ function update(boid) {
  * Render the boid
  * A triangle rotated in the direction of the velocity
  */
-function render(boid, context) {
+function render(boid, context, width, height, color) {
   const theta = boid.velocity.heading() + Math.PI / 2;
 
-  context.save();
-  context.fillStyle = '#fff';
-  context.translate(boid.position.x, boid.position.y);
-  context.rotate(theta);
+  context.fillStyle = boid.color; //'#fff';
+  context.strokeStyle = boid.color; //'#fff';
+  context.lineWidth = boid.r;
+
+  const chunks = splitPath(boid, width, height);
+
+  chunks.forEach(chunk => {
+    if (chunk.length > 1) {
+      context.beginPath();
+      drawShape(context, chunk, false);
+      context.stroke();
+    }
+  });
+
   context.beginPath();
-  context.moveTo(0, -boid.r * 2);
-  context.lineTo(-boid.r, boid.r * 2);
-  context.lineTo(boid.r, boid.r * 2);
+  context.arc(boid.position.x, boid.position.y, boid.r * 1.25, 0, 2 * Math.PI);
   context.fill();
-  context.restore();
 }
 
 /**
@@ -107,12 +145,10 @@ function render(boid, context) {
  * Steer to avoid crowding local boids
  */
 function separate(boids, boid) {
-  const desiredSeparation = 25.0;
-
   const [count, direction] = boids.reduce(
     ([count, direction], otherBoid) => {
       const d = boid.position.dist(otherBoid.position);
-      if (d > 0 && d < desiredSeparation) {
+      if (d > 0 && d < CONFIG.desiredSeparation) {
         // Calculate vector pointing away from neighbour
         const diff = Vector.sub(boid.position, otherBoid.position)
           .normalize()
@@ -139,12 +175,10 @@ function separate(boids, boid) {
  * Steer towards the average heading of local boids
  */
 function align(boids, boid) {
-  const neighbourDist = 50;
-
   const [count, direction] = boids.reduce(
     ([count, direction], otherBoid) => {
       const d = Vector.dist(boid.position, otherBoid.position);
-      return d > 0 && d < neighbourDist
+      return d > 0 && d < CONFIG.neighbourDist
         ? [count + 1, direction.add(otherBoid.velocity)]
         : [count, direction];
     },
@@ -166,12 +200,10 @@ function align(boids, boid) {
  * Steer to move toward the average position of local boids
  */
 function cohesion(boids, boid) {
-  const neighbourDist = 50;
-
   const [count, direction] = boids.reduce(
     ([count, direction], otherBoid) => {
       const d = Vector.dist(boid.position, otherBoid.position);
-      return d > 0 && d < neighbourDist
+      return d > 0 && d < CONFIG.neighbourDist
         ? [count + 1, direction.add(otherBoid.position)]
         : [count, direction];
     },
@@ -225,4 +257,30 @@ function handleBoundaries(width, height) {
       boid.position.y = -boid.r;
     }
   };
+}
+
+/**
+ * Split path into chunks that are on or off canvas
+ */
+function splitPath(boid, width, height) {
+  let prevOffCanvas = false;
+
+  return boid.trail.reduce(
+    (acc, pt) => {
+      const offCanvas =
+        pt[0] < -boid.r ||
+        pt[0] > width + boid.r ||
+        pt[1] < -boid.r ||
+        pt[1] > height + boid.r;
+
+      if (offCanvas !== prevOffCanvas) {
+        acc.push([]);
+      }
+
+      acc[acc.length - 1].push(pt);
+      prevOffCanvas = offCanvas;
+      return acc;
+    },
+    [[]],
+  );
 }

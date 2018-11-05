@@ -230,4 +230,13 @@ export default [
       'renders/dithering8.png',
     ],
   },
+  {
+    name: 'Flocking',
+    featured: 'renders/flocking2.gif',
+    imgs: [
+      'renders/flocking1.gif',
+      'renders/flocking2.gif',
+      'renders/flocking3.gif',
+    ],
+  },
 ];

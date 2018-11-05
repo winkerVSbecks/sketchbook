@@ -57,10 +57,23 @@ const pastel = [
 
 const ellsworthKelly = ['#f13401', '#0769ce', '#f1d93c', '#11804b'];
 
+const warm = [
+  '#7c203a',
+  '#f85959',
+  '#ff9f68',
+  '#feff89',
+  '#f8b195',
+  '#f67280',
+  '#c06c84',
+  '#355c7d',
+  '#6c567b',
+];
+
 module.exports = {
   hueCycle,
   pigments,
   spectrum,
   pastel,
   ellsworthKelly,
+  warm,
 };
