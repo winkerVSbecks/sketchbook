@@ -33,6 +33,7 @@
     "reline": "^1.0.0-beta.3",
     "simplex-noise": "^2.4.0",
     "styled-components": "^3.4.2",
+    "triangle-circle-collision": "^1.0.4",
     "tween-chain": "^1.0.0",
     "tween-ticker": "^3.3.2"
   },

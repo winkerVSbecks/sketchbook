@@ -239,4 +239,19 @@ export default [
       'renders/flocking3.gif',
     ],
   },
+  {
+    name: 'Eclipse',
+    featured: 'renders/eclipse8.png',
+    imgs: [
+      'renders/eclipse.png',
+      'renders/eclipse2.png',
+      'renders/eclipse3.png',
+      'renders/eclipse4.png',
+      'renders/eclipse5.png',
+      'renders/eclipse6.png',
+      'renders/eclipse7.png',
+      'renders/eclipse8.png',
+      'renders/eclipse9.png',
+    ],
+  },
 ];

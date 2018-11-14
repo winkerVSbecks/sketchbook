@@ -69,6 +69,18 @@ const warm = [
   '#6c567b',
 ];
 
+const bilbao = [
+  '#FAD5DC',
+  '#05323D',
+  '#F6C4B1',
+  '#D4DB6E',
+  '#EB7574',
+  '#55B867',
+  '#D7C84A',
+  '#33B2A2',
+  '#CD202F',
+];
+
 module.exports = {
   hueCycle,
   pigments,
@@ -76,4 +88,5 @@ module.exports = {
   pastel,
   ellsworthKelly,
   warm,
+  bilbao,
 };
