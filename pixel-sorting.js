@@ -22,7 +22,6 @@ const sketch = async ({ update }) => {
     context.drawImage(image, 0, 0, width, height);
     const pixels = context.getImageData(0, 0, width, height);
     let data = pixels.data;
-    const len = data.length;
 
     const byWeightedHsl = compareByHsl({ h: 2, l: 4, s: 0 });
 

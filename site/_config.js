@@ -277,4 +277,21 @@ export default [
       'renders/pixel-sorting16.png',
     ],
   },
+  {
+    name: 'Pixel Slices',
+    featured: 'renders/pixel-slices4.png',
+    imgs: [
+      'renders/pixel-slices1.png',
+      'renders/pixel-slices2.png',
+      'renders/pixel-slices3.png',
+      'renders/pixel-slices4.png',
+      'renders/pixel-slices5.png',
+      'renders/pixel-slices6.png',
+      'renders/pixel-slices7.png',
+      'renders/pixel-slices8.png',
+      'renders/pixel-slices9.png',
+      'renders/pixel-slices10.png',
+      'renders/pixel-slices11.png',
+    ],
+  },
 ];
