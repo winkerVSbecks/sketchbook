@@ -294,4 +294,9 @@ export default [
       'renders/pixel-slices11.png',
     ],
   },
+  {
+    name: 'Polygon HUD',
+    featured: 'renders/polygon-hud.gif',
+    imgs: ['renders/polygon-hud.gif'],
+  },
 ];
