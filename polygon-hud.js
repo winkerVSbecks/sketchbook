@@ -6,14 +6,12 @@ const {
   mapRange,
   degToRad,
 } = require('canvas-sketch-util/math');
-const { beat } = require('./easings');
 const { regularPolygon, drawShape } = require('./geometry');
 
 const settings = {
   dimensions: [1060, 500],
   animate: true,
   duration: 5,
-  // scaleToView: true,
 };
 
 const clrs = {
