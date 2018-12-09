@@ -18,7 +18,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "canvas-sketch": "0.0.15",
+    "canvas-sketch": "^0.1.0",
     "canvas-sketch-util": "^1.4.0",
     "cardinal-spline-js": "^2.3.9",
     "chroma-js": "^1.3.7",
