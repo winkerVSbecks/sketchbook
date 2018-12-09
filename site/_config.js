@@ -304,6 +304,7 @@ export default [
     featured: 'renders/isolines1.gif',
     imgs: [
       'renders/isolines3.gif',
+      'renders/isolines4.gif',
       'renders/isolines1.gif',
       'renders/isolines2.gif',
     ],
