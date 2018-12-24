@@ -309,4 +309,14 @@ export default [
       'renders/isolines2.gif',
     ],
   },
+  {
+    name: 'Basilar',
+    featured: 'renders/basilar1.gif',
+    imgs: [
+      'renders/basilar1.gif',
+      'renders/basilar2.gif',
+      'renders/basilar3.gif',
+      'renders/basilar4.gif',
+    ],
+  },
 ];
