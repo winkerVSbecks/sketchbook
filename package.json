@@ -18,6 +18,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "animejs": "^2.2.0",
     "canvas-sketch": "^0.1.0",
     "canvas-sketch-util": "^1.6.0",
     "cardinal-spline-js": "^2.3.9",
@@ -36,7 +37,8 @@
     "styled-components": "^3.4.2",
     "triangle-circle-collision": "^1.0.4",
     "tween-chain": "^1.0.0",
-    "tween-ticker": "^3.3.2"
+    "tween-ticker": "^3.3.2",
+    "tweenr": "^2.2.1"
   },
   "devDependencies": {
     "@compositor/x0": "^6.0.3",
