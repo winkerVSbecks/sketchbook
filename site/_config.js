@@ -319,4 +319,9 @@ export default [
       'renders/basilar4.gif',
     ],
   },
+  {
+    name: 'Terrain Cube',
+    featured: 'renders/terrain-cube1.gif',
+    imgs: ['renders/terrain-cube1.gif', 'renders/terrain-cube2.gif'],
+  },
 ];

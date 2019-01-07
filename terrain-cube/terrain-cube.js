@@ -1,22 +1,24 @@
 const canvasSketch = require('canvas-sketch');
-const { linspace } = require('canvas-sketch-util/math');
+const { linspace, mapRange } = require('canvas-sketch-util/math');
 const anime = require('animejs');
 const easings = require('../easings');
 const Renderer3D = require('../renderer-3d');
 const isolines = require('./isolines');
 const { drawShape } = require('../geometry');
+const wordShuffler = require('./word-shuffler');
+const { code, output } = require('./text');
 
 const settings = {
   dimensions: [800, 600],
   animate: true,
-  duration: 3 * 2,
+  duration: 6,
   scaleToView: true,
 };
 
 const renderer = new Renderer3D(
   1.5,
   {
-    x: Math.atan(1 / 2 ** 0.5), //Math.asin(Math.tan(Math.PI / 6)),
+    x: Math.atan(1 / 2 ** 0.5),
     z: 0,
     y: Math.PI / 4,
   },
@@ -46,7 +48,8 @@ const sketch = () => {
         tabs: { a: TAB.s_2, b: TAB.s_2, fill: 'rgba(255, 255, 255, 0)' },
         angles: { y: Math.PI / 4 },
         grids: { top: -A / 8, bottom: A / 8, stroke: 'rgba(255, 255, 255, 0)' },
-        isolines: { y: A / 8 },
+        isolines: { y: A / 8, opacity: 0 },
+        text: { fill: 'rgba(255, 255, 255, 0.5)' },
       };
 
       timeline
@@ -96,9 +99,26 @@ const sketch = () => {
             { value: A * 0.8, duration: 1.2 },
             { delay: 0.4, value: 0, duration: 1.2 },
           ],
+          opacity: { value: 0.3, duration: 0.4 },
           easing: 'easeInOutCubic',
         })
-        .add({ targets: {}, duration: 0.8 });
+        .add({ targets: {}, duration: 0.8 })
+        .add({
+          targets: [anms.isolines, anms.text],
+          fill: 'rgba(255, 255, 255, 0)',
+          opacity: { value: 0, delay: 0.3 },
+          duration: 0.4,
+          easing: 'easeInQuint',
+        })
+        .add({
+          targets: [anms.grids, anms.tabs],
+          top: { value: -A / 8, easing: 'easeInOutCubic' },
+          bottom: { value: A / 8, easing: 'easeInOutCubic' },
+          stroke: { value: 'rgba(255, 255, 255, 0)', delay: 0.1 },
+          fill: { value: 'rgba(255, 255, 255, 0)', delay: 0.1 },
+          easing: 'easeOutQuint',
+          duration: 0.5,
+        });
 
       gridScrollLarge = { x: 0 };
       gridScrollLargeAnim = anime({
@@ -126,12 +146,12 @@ const sketch = () => {
       gridScrollSmallAnim.tick(time);
       renderer.setRotationY(anms.angles.y);
 
-      context.fillStyle = '#0D0308';
+      context.fillStyle = '#000';
       context.clearRect(0, 0, width, height);
       context.fillRect(0, 0, width, height);
       context.translate(width / 2, height / 2);
 
-      // renderer.cube(context, A);
+      // renderer.cube(context, A, 'rgba(0, 255, 0, 0.25)');
       drawCornerTabs(context, A, anms, TAB);
       drawPulse(context, A, anms);
       drawGrid(
@@ -142,11 +162,12 @@ const sketch = () => {
         anms.grids.stroke,
         gridScrollSmall.x,
       );
-      drawIsolines(context, playhead, {
-        y: anms.isolines.y,
-        size: A,
-        offset: [0, 0],
-      });
+      drawIsolines(
+        context,
+        playhead,
+        { y: anms.isolines.y, size: A, offset: [0, 0] },
+        anms.isolines.opacity,
+      );
       drawGrid(
         context,
         2,
@@ -156,8 +177,8 @@ const sketch = () => {
         gridScrollLarge.x,
       );
 
-      renderer.text(context, 'REC ◼', [0.5, -0.45, 0.45], 'right');
-      renderer.text(context, 'REC ◼', [-0.45, -0.45, 0.5], 'left');
+      drawDataText(context, A, playhead, anms.text.fill);
+      drawScrollText(context, A, playhead, anms.text.fill);
     },
   };
 };
@@ -255,12 +276,12 @@ function drawGrid(context, resolution, y, amplitude, stroke, _translateX = 0) {
   });
 }
 
-function drawIsolines(context, playhead, { y, size, offset }) {
+function drawIsolines(context, playhead, { y, size, offset }, opacity = 0.3) {
   context.lineWidth = 3;
   context.lineJoin = 'round';
 
   isolines({ y, size, offset }, playhead, band => {
-    renderer.shape(context, band, 'hsla(220, 100%, 50%, 0.3)');
+    renderer.shape(context, band, `hsla(220, 100%, 50%, ${opacity})`);
     context.stroke();
   });
 
@@ -269,4 +290,55 @@ function drawIsolines(context, playhead, { y, size, offset }) {
     [[-size, y, -size], [size, y, -size], [size, y, size], [-size, y, size]],
     '#000',
   );
+}
+
+/**
+ * Draw the UI text
+ */
+function drawDataText(context, A, playhead, textColor) {
+  const location = [A, -A * 0.8, A * 0.8];
+  const data = mapRange(playhead, 0, 1, 0, 2810).toFixed(1);
+  renderer.text(
+    context,
+    wordShuffler(`Vol. of Data ${data}k`, playhead, 0.1, 0.2, 0.01),
+    location,
+    'right',
+    textColor,
+    '12px monospace',
+  );
+
+  const visible = Math.round(
+    mapRange(playhead, 0.2, 0.5, 0, output.length, true),
+  );
+
+  output.slice(0, visible).forEach((text, idx) => {
+    renderer.text(
+      context,
+      text,
+      [location[0], -A * (0.5 - 0.1 * idx), location[2]],
+      'right',
+      textColor,
+      '6px monospace',
+    );
+  });
+}
+
+const range = 8;
+
+function drawScrollText(context, A, playhead, textColor) {
+  const scroll = Math.round(
+    mapRange(playhead, 0.2, 1, 0, code.length / 8, true),
+  );
+  const start = scroll < range ? 0 : scroll - range;
+
+  code.slice(start, scroll).forEach((text, idx) => {
+    renderer.text(
+      context,
+      text,
+      [-A * 0.8, -A * (0.3 - 0.1 * idx), A],
+      'left',
+      textColor,
+      '6px monospace',
+    );
+  });
 }

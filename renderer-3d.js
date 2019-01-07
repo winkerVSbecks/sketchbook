@@ -32,7 +32,7 @@ const faces = {
 class Renderer3D {
   constructor(
     d,
-    angles = { x: Math.atan(2 ** 0.5), y: 0, z: Math.PI / 4 },
+    angles = { x: Math.atan(1 / 2 ** 0.5), y: 0, z: Math.PI / 4 },
     scale,
   ) {
     this.d = d;
@@ -41,7 +41,7 @@ class Renderer3D {
     this.setRotationX(angles.x);
     this.setRotationY(angles.y);
     this.setRotationZ(angles.z);
-    this.toIso = this.toIso.bind(this);
+    this.convert3dTo2d = this.convert3dTo2d.bind(this);
   }
 
   setRotationX(angle) {
@@ -75,7 +75,7 @@ class Renderer3D {
   }
 
   // http://www.petercollingridge.co.uk/tutorials/svg/isometric-projection/
-  toIso(vertex) {
+  convert3dTo2d(vertex) {
     let rotated = matrixMultiply(this.rotationX, this.rotationY);
     rotated = matrixMultiply(rotated, vertex.map(v => [v]));
 
@@ -88,7 +88,7 @@ class Renderer3D {
     return matrixMultiply(projection, rotated).map(v => (v * this.scale) / 4);
   }
 
-  cube(context, size) {
+  cube(context, size, stroke) {
     // prettier-ignore
     const cube = [
       [-size, -size, -size],
@@ -99,13 +99,10 @@ class Renderer3D {
       [size, -size, size],
       [size, size, size],
       [-size, size, size],
-    ].map(this.toIso);
+    ].map(this.convert3dTo2d);
 
     cubeEdges.forEach(([a, b]) => {
-      line(context, cube[a], cube[b], {
-        lineWidth: 1,
-        stroke: 'rgba(255, 0, 255, 0.5)',
-      });
+      line(context, cube[a], cube[b], { lineWidth: 1, stroke });
     });
   }
 
@@ -118,7 +115,7 @@ class Renderer3D {
    */
   face(context, faceProps, fill = '#fff', stroke) {
     context.fillStyle = fill;
-    const face = this.getFace(...faceProps).map(this.toIso);
+    const face = this.getFace(...faceProps).map(this.convert3dTo2d);
 
     drawShape(context, face);
     context.fill();
@@ -130,16 +127,19 @@ class Renderer3D {
   }
 
   line(context, a, b, stroke, lineWidth = 1) {
-    line(context, this.toIso(a), this.toIso(b), { lineWidth, stroke });
+    line(context, this.convert3dTo2d(a), this.convert3dTo2d(b), {
+      lineWidth,
+      stroke,
+    });
   }
 
   shape(context, shape, stroke) {
     context.strokeStyle = stroke;
-    drawShape(context, shape.map(this.toIso));
+    drawShape(context, shape.map(this.convert3dTo2d));
     context.stroke();
   }
 
-  text(context, string, location, direction, font = '24px monospace') {
+  text(context, string, location, direction, fill, font = '16px monospace') {
     const angleY = this.angles.y - Math.PI / 2;
     const rotationY =
       direction === 'right'
@@ -151,16 +151,15 @@ class Renderer3D {
         : this.rotationY;
     let r = matrixMultiply(this.rotationX, rotationY);
 
-    const [x, y] = this.toIso(location);
+    const [x, y] = this.convert3dTo2d(location);
 
     context.save();
-    // context.transform(r[0][0], r[1][0], r[0][1], r[1][1], r[0][2], r[1][2]);
     context.font = font;
     context.textBaseline = 'top';
     context.textAlign = 'left';
-    context.fillStyle = '#fff';
-
-    context.fillText(string, x, y);
+    context.fillStyle = fill;
+    context.transform(r[0][0], r[1][0], r[0][1], r[1][1], x, y);
+    context.fillText(string, 0, 0);
     context.restore();
   }
 }
