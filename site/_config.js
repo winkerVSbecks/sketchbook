@@ -324,4 +324,9 @@ export default [
     featured: 'renders/terrain-cube1.gif',
     imgs: ['renders/terrain-cube1.gif', 'renders/terrain-cube2.gif'],
   },
+  {
+    name: 'Space Zap',
+    featured: 'renders/space-zap.gif',
+    imgs: ['renders/space-zap.gif', 'renders/space-zap1.gif'],
+  },
 ];
