@@ -1,7 +1,7 @@
 # sketchbook
 👨🏽‍🔬 experiments in generative art
 
-![lorenz attractor](lorenz-attractor.gif)
+<img src="lorenz-attractor.gif" style="max-width: 400px !important;" />
 
 ### Getting Started
 
