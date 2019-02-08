@@ -1,8 +1,6 @@
 # sketchbook
 👨🏽‍🔬 experiments in generative art
 
-<img src="lorenz-attractor.gif" style="max-width: 400px !important;" />
-
 ### Getting Started
 
 This project is using [canvas-sketch](https://github.com/mattdesl/canvas-sketch) which allows you to scaffold and run sketches.
