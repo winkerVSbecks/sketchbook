@@ -329,4 +329,16 @@ export default [
     featured: 'renders/space-zap.gif',
     imgs: ['renders/space-zap.gif', 'renders/space-zap1.gif'],
   },
+  {
+    name: 'Shadow Piercing Descendant Combinator',
+    featured: 'renders/shadow-piercing-descendant-combinator1.gif',
+    imgs: [
+      'renders/shadow-piercing-descendant-combinator1.gif',
+      'renders/shadow-piercing-descendant-combinator2.gif',
+      'renders/shadow-piercing-descendant-combinator3.gif',
+      'renders/shadow-piercing-descendant-combinator4.gif',
+      'renders/shadow-piercing-descendant-combinator5.gif',
+      'renders/shadow-piercing-descendant-combinator6.gif',
+    ],
+  },
 ];
