@@ -14,7 +14,7 @@ const { drawShape } = require('./geometry');
 
 const settings = {
   animate: true,
-  duration: 4,
+  duration: 6,
   dimensions: [800, 600],
   scaleToView: true,
 };
@@ -73,8 +73,8 @@ const sketch = async app => {
 
   // Store a list of active circles
   const points = [];
-  const pipes = linspace(1).map(() => ({
-    pts: [[1, 1], [3, 1], [3, 4], [6, 4], [6, 6], [8, 6], [10, 6], [10, 12]], //pipeOfLength(12)
+  const pipes = linspace(24 + 6).map(() => ({
+    pts: pipeOfLength(12), // [[1, 1], [3, 1], [3, 4], [6, 4], [6, 6], [8, 6], [10, 6], [10, 12]]
     color: Random.pick(PALETTE),
   }));
 
@@ -178,23 +178,8 @@ canvasSketch(sketch, settings);
 
 function drawPipeToScale(context, [width, height]) {
   return (_pts, color, bg, playhead) => {
-    // Split into half
-    // from -> to
-    const head = Math.floor(_pts.length * 0.5);
-    const tail = _pts.length - head;
-    const from = _pts.slice(0, head);
-    const to = _pts.slice(head - 1);
     const t = Math.sin(playhead * Math.PI);
-
-    const pts = _pts
-      // from
-      // .map((pt, idx) =>
-      //   lerpFrames(
-      //     _pts.slice(idx, _pts.length),
-      //     Math.abs(Math.cos(playhead * Math.PI)),
-      //   ),
-      // )
-      .map(uvToXy([width, height]));
+    const pts = _pts.map(uvToXy([width, height]));
 
     let l = 0;
     for (let i = 1; i < pts.length; i++) {
@@ -224,7 +209,6 @@ function drawPipeToScale(context, [width, height]) {
     context.lineDashOffset = mapRange(t, 0, 1, 0, -l * 0.6);
     context.strokeStyle = bg;
     context.lineWidth = 12;
-    // drawShape(context, pts.slice(0, Math.floor(pts.length * 0.75)), false);
     drawShape(context, pts, false);
     context.stroke();
 
@@ -233,7 +217,6 @@ function drawPipeToScale(context, [width, height]) {
     context.lineDashOffset = mapRange(t, 0, 1, 0, -l * 0.7);
     context.strokeStyle = color;
     context.lineWidth = 6;
-    // drawShape(context, pts.slice(0, Math.floor(pts.length * 0.5)), false);
     drawShape(context, pts, false);
     context.stroke();
   };
