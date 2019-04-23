@@ -1,15 +1,6 @@
 const canvasSketch = require('canvas-sketch');
-const Tone = require('tone');
 const Random = require('canvas-sketch-util/random');
-const {
-  lerp,
-  mapRange,
-  lerpFrames,
-  linspace,
-  clamp,
-} = require('canvas-sketch-util/math');
-const createTouchListener = require('touches');
-const { quadInOut } = require('eases');
+const { mapRange, linspace, clamp } = require('canvas-sketch-util/math');
 const { drawShape } = require('./geometry');
 
 const settings = {
@@ -36,43 +27,6 @@ const sketch = async app => {
   // Take a background color
   const background = PALETTE.shift();
 
-  // Setup a reverb with ToneJS
-  const reverb = new Tone.Reverb({
-    decay: 4,
-    wet: 0.5,
-    preDelay: 0.2,
-  }).toMaster();
-
-  // Load the reverb
-  await reverb.generate();
-
-  // Setup a synth with ToneJS
-  const synth = new Tone.Synth({
-    oscillator: {
-      type: 'sine',
-    },
-    envelope: {
-      attack: 0.001,
-      decay: 0.5,
-      sustain: 0.001,
-      release: 5,
-    },
-  }).connect(reverb);
-
-  // The notes we will use
-  const notes = ['C5', 'A3', 'D4', 'G4', 'A4', 'F4'];
-
-  // Let's use this handy utility to handle mouse/touch taps
-  const touches = createTouchListener(canvas).on('start', addNote);
-
-  // Avoid iOS window dragging
-  const preventDefault = ev => ev.preventDefault();
-  document.addEventListener('touchmove', preventDefault, {
-    passive: false,
-  });
-
-  // Store a list of active circles
-  const points = [];
   const pipes = linspace(24 + 6).map(() => ({
     pts: pipeOfLength(12), // [[1, 1], [3, 1], [3, 4], [6, 4], [6, 6], [8, 6], [10, 6], [10, 12]]
     color: Random.pick(PALETTE),
@@ -82,15 +36,6 @@ const sketch = async app => {
   return {
     // The draw function
     render({ deltaTime, context, width, height, time, playhead }) {
-      // First update point time & remove any inactive points
-      for (let i = points.length - 1; i >= 0; i--) {
-        const point = points[i];
-        point.time += deltaTime;
-        if (point.time > point.duration) {
-          points.splice(i, 1);
-        }
-      }
-
       // Draw background
       context.fillStyle = background;
       context.lineCap = 'round';
@@ -104,74 +49,8 @@ const sketch = async app => {
       });
 
       // drawGrid(context, width, height);
-
-      // Draw points
-      points.forEach(point => {
-        const { position, color, radius, time, duration } = point;
-
-        // Un-normalize coordinates
-        const x = position[0] * width;
-        const y = position[1] * height;
-
-        // Get a 0...1 value
-        // const tween = quadInOut(Math.sin((time / duration) * Math.PI));
-        const tween = quadInOut(time / duration);
-
-        context.beginPath();
-        context.arc(x, y, width * radius * tween, 0, Math.PI * 2, false);
-        context.fillStyle = color;
-        context.fill();
-      });
-    },
-    unload() {
-      // Disable mouse listeners
-      touches.disable();
-      document.removeEventListener('touchmove', preventDefault);
-
-      // Clean up the ToneJS nodes
-      reverb.dispose();
-      synth.dispose();
     },
   };
-
-  // Create a sound
-  function addNote(ev, clientPosition) {
-    // Get current DOM CSS style width & height from the application
-    // This is after retina scaling, and is always updated in the 'app' instance
-    const { styleWidth, styleHeight } = app;
-
-    // Mouse/touch XY comes from 'touches' utility
-    const [x, y] = clientPosition;
-
-    // Random note
-    const noteIndex = Random.rangeFloor(notes.length);
-
-    // Random color from note index
-    const color = PALETTE[noteIndex % PALETTE.length];
-
-    // Normalize so rendering is not bound to screen size
-    const position = [x / styleWidth, y / styleHeight];
-
-    const radius = Math.abs(Random.gaussian(1, 0.25));
-
-    // Add to screen
-    points.push({
-      position,
-      color,
-      duration: Random.range(1, 2),
-      time: 0,
-      radius: radius * 0.1,
-    });
-
-    // Trigger a sound
-    const velocity = 1;
-    synth.triggerAttackRelease(
-      notes[noteIndex],
-      '16n',
-      synth.context.currentTime,
-      velocity,
-    );
-  }
 };
 
 canvasSketch(sketch, settings);

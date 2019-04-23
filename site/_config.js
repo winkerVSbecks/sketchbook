@@ -341,4 +341,22 @@ export default [
       'renders/shadow-piercing-descendant-combinator6.gif',
     ],
   },
+  {
+    name: 'Pipes',
+    featured: 'renders/pipes1.gif',
+    imgs: [
+      'renders/pipes1.gif',
+      'renders/pipes2.gif',
+      'renders/pipes3.gif',
+      'renders/pipes4.gif',
+      'renders/pipes5.gif',
+      'renders/pipes6.gif',
+      'renders/pipes7.gif',
+      'renders/pipes8.gif',
+      'renders/pipes9.gif',
+      'renders/pipes10.gif',
+      'renders/pipes11.gif',
+      'renders/pipes12.gif',
+    ],
+  },
 ];
