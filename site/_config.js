@@ -343,7 +343,7 @@ export default [
   },
   {
     name: 'Pipes',
-    featured: 'renders/pipes1.gif',
+    featured: 'renders/pipes9.gif',
     imgs: [
       'renders/pipes1.gif',
       'renders/pipes2.gif',
