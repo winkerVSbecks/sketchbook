@@ -359,4 +359,17 @@ export default [
       'renders/pipes12.gif',
     ],
   },
+  {
+    name: 'Infinite Pipes',
+    featured: 'renders/pipes1.gif',
+    imgs: [
+      'renders/infinite-pipes1.gif',
+      'renders/infinite-pipes2.gif',
+      'renders/infinite-pipes3.gif',
+      'renders/infinite-pipes4.gif',
+      'renders/infinite-pipes5.gif',
+      'renders/infinite-pipes6.gif',
+      'renders/infinite-pipes7.gif',
+    ],
+  },
 ];
