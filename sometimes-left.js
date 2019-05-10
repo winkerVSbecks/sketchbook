@@ -1,4 +1,3 @@
-import { T } from 'ramda';
 const canvasSketch = require('canvas-sketch');
 const { lerp } = require('canvas-sketch-util/math');
 const Random = require('canvas-sketch-util/random');
