@@ -372,4 +372,13 @@ export default [
       'renders/infinite-pipes7.gif',
     ],
   },
+  {
+    name: 'Sometimes Left',
+    featured: 'renders/sometimes-left.gif',
+    imgs: [
+      'renders/sometimes-left2.gif',
+      'renders/sometimes-left.gif',
+      'renders/sometimes-left1.gif',
+    ],
+  },
 ];
