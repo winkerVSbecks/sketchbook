@@ -3,7 +3,6 @@ const { linspace, mapRange } = require('canvas-sketch-util/math');
 const Random = require('canvas-sketch-util/random');
 const { pointInPoly } = require('point-util');
 const { Delaunay } = require('d3-delaunay');
-// const poissonDiscSampler = require('poisson-disc-sampler');
 const { drawShape } = require('./geometry');
 
 const settings = {
@@ -11,7 +10,7 @@ const settings = {
   scaleToView: false,
 };
 
-const clr = () => Random.pick(['#4A3E3E', '#fff648', '#feb6de', '#fa530a']); // #c4f4fe
+const clr = () => Random.pick(['#4A3E3E', '#fff648', '#feb6de', '#fa530a']);
 const clrs = {
   blue: '#c4f4fe',
   black: '#4A3E3E',
@@ -32,6 +31,7 @@ canvasSketch(() => {
       context.fillStyle = '#c4f4fe';
       context.fillRect(0, 0, width, height);
 
+      // // Random Polygons
       // const polygons = linspace(25).map(() => {
       //   const location = [
       //     Random.gaussian(width * 0.5, width * 0.4),
@@ -43,14 +43,24 @@ canvasSketch(() => {
       //   };
       // });
 
-      const polygons = [
-        ...poissonDiscSampler(0, 0, width, height, width * 0.2),
-      ].map(location => {
-        return {
-          polygon: randomPolygon(height * 0.125, height * 0.25, location),
-          draw: getFill(),
-        };
-      });
+      // // Poisson Disc Sampler Polygons
+      // const polygons = [
+      //   ...poissonDiscSampler(0, 0, width, height, width * 0.2),
+      // ].map(location => {
+      //   return {
+      //     polygon: randomPolygon(height * 0.125, height * 0.25, location),
+      //     draw: getFill(),
+      //   };
+      // });
+
+      // Poisson Disc Sampler Polygons + Voronoi
+      const pts = [...poissonDiscSampler(0, 0, width, height, width * 0.1)];
+      const delaunay = Delaunay.from(pts);
+      const voronoi = delaunay.voronoi([0, 0, width, height]);
+      const polygons = [...voronoi.cellPolygons()].map(polygon => ({
+        polygon,
+        draw: getFill(),
+      }));
 
       polygons.forEach(({ polygon, draw }) => {
         draw(context, polygon, width * 0.01);
@@ -78,7 +88,7 @@ function makeGradient(context, [x1, y1], [x2, y2], start, end) {
   return gradient;
 }
 
-function spaceFill(context, polygon, size) {
+function spaceFill(context, polygon, size, fill = clrs.blue) {
   const [xMin, yMin, xMax, yMax] = [
     polygon.reduce((a, [x, y]) => Math.min(a, x), polygon[0][0]),
     polygon.reduce((a, [x, y]) => Math.min(a, y), polygon[0][1]),
@@ -86,21 +96,23 @@ function spaceFill(context, polygon, size) {
     polygon.reduce((a, [x, y]) => Math.max(a, y), polygon[0][1]),
   ];
 
-  const points = [...poissonDiscSampler(xMin, yMin, xMax, yMax, size * 3)];
+  const points = [...poissonDiscSampler(xMin, yMin, xMax, yMax, size * 2)];
 
   context.save();
   let region = new Path2D();
-  region.moveTo(polygon[0][0], polygon[0][1]);
-  region.lineTo(polygon[1][0], polygon[1][1]);
-  region.lineTo(polygon[2][0], polygon[2][1]);
-  region.lineTo(polygon[3][0], polygon[3][1]);
+  const [first, ...rest] = polygon;
+
+  region.moveTo(...first);
+  rest.forEach(pt => {
+    region.lineTo(...pt);
+  });
   region.closePath();
   context.clip(region, 'evenodd');
 
-  context.fillStyle = clrs.blue;
+  context.fillStyle = fill;
   points.forEach(([x, y]) => {
     context.beginPath();
-    context.arc(x, y, Random.range(size * 0.25, size * 0.75), 0, 2 * Math.PI);
+    context.arc(x, y, Random.range(size * 0.125, size * 0.5), 0, 2 * Math.PI);
     context.fill();
   });
 
@@ -109,67 +121,155 @@ function spaceFill(context, polygon, size) {
 
 function getFill() {
   return Random.weightedSet([
+    // {
+    //   weight: 50,
+    //   value: (context, polygon) => {
+    //     context.fillStyle = makeGradient(
+    //       context,
+    //       polygon[0],
+    //       polygon[2],
+    //       clrs.pink,
+    //       clrs.red,
+    //     );
+    //     drawShape(context, polygon);
+    //     context.fill();
+    //   },
+    // },
+    // {
+    //   weight: 50,
+    //   value: (context, polygon) => {
+    //     context.fillStyle = makeGradient(
+    //       context,
+    //       polygon[0],
+    //       polygon[2],
+    //       clrs.red,
+    //       clrs.yellow,
+    //     );
+    //     drawShape(context, polygon);
+    //     context.fill();
+    //   },
+    // },
+    // {
+    //   weight: 50,
+    //   value: (context, polygon) => {
+    //     context.fillStyle = clrs.blue;
+    //     drawShape(context, polygon);
+    //     context.fill();
+    //   },
+    // },
+    // {
+    //   weight: 20,
+    //   value: (context, polygon) => {
+    //     context.fillStyle = clrs.red;
+    //     drawShape(context, polygon);
+    //     context.fill();
+    //   },
+    // },
+    // {
+    //   weight: 20,
+    //   value: (context, polygon) => {
+    //     context.fillStyle = clrs.yellow;
+    //     drawShape(context, polygon);
+    //     context.fill();
+    //   },
+    // },
+    // {
+    //   weight: 20,
+    //   value: (context, polygon) => {
+    //     context.fillStyle = clrs.pink;
+    //     drawShape(context, polygon);
+    //     context.fill();
+    //   },
+    // },
     {
-      weight: 50,
-      value: (context, polygon) => {
-        context.fillStyle = makeGradient(
-          context,
-          polygon[0],
-          polygon[2],
-          clrs.pink,
-          clrs.red,
-        );
-        drawShape(context, polygon);
-        context.fill();
-      },
-    },
-    {
-      weight: 50,
-      value: (context, polygon) => {
-        context.fillStyle = makeGradient(
-          context,
-          polygon[0],
-          polygon[2],
-          clrs.red,
-          clrs.yellow,
-        );
-        drawShape(context, polygon);
-        context.fill();
-      },
-    },
-    {
-      weight: 20,
-      value: (context, polygon) => {
-        context.fillStyle = clrs.red;
-        drawShape(context, polygon);
-        context.fill();
-      },
-    },
-    {
-      weight: 20,
-      value: (context, polygon) => {
-        context.fillStyle = clrs.yellow;
-        drawShape(context, polygon);
-        context.fill();
-      },
-    },
-    {
-      weight: 20,
-      value: (context, polygon) => {
-        context.fillStyle = clrs.pink;
-        drawShape(context, polygon);
-        context.fill();
-      },
-    },
-    {
-      weight: 75,
+      weight: 100,
       value: (context, polygon, size) => {
         context.fillStyle = clrs.black;
+        context.strokeStyle = clrs.black;
         drawShape(context, polygon);
         context.fill();
-        spaceFill(context, polygon, size);
+        context.stroke();
+        spaceFill(context, polygon, size, clrs.blue);
       },
     },
+    // {
+    //   weight: 100,
+    //   value: (context, polygon, size) => {
+    //     context.fillStyle = clrs.black;
+    //     context.strokeStyle = clrs.black;
+    //     drawShape(context, polygon);
+    //     context.fill();
+    //     context.stroke();
+    //     spaceFill(context, polygon, size, clrs.pink);
+    //   },
+    // },
+    // {
+    //   weight: 100,
+    //   value: (context, polygon, size) => {
+    //     context.fillStyle = clrs.black;
+    //     context.strokeStyle = clrs.black;
+    //     drawShape(context, polygon);
+    //     context.fill();
+    //     context.stroke();
+    //     spaceFill(context, polygon, size, clrs.yellow);
+    //   },
+    // },
+    // {
+    //   weight: 100,
+    //   value: (context, polygon, size) => {
+    //     context.fillStyle = clrs.black;
+    //     context.strokeStyle = clrs.black;
+    //     drawShape(context, polygon);
+    //     context.fill();
+    //     context.stroke();
+    //     spaceFill(context, polygon, size, clrs.red);
+    //   },
+    // },
+    // {
+    //   weight: 100,
+    //   value: (context, polygon, size) => {
+    //     context.fillStyle = clrs.pink;
+    //     drawShape(context, polygon);
+    //     context.fill();
+    //     spaceFill(context, polygon, size, clrs.red);
+    //   },
+    // },
+    // {
+    //   weight: 100,
+    //   value: (context, polygon, size) => {
+    //     context.fillStyle = clrs.red;
+    //     drawShape(context, polygon);
+    //     context.fill();
+    //     spaceFill(context, polygon, size, clrs.yellow);
+    //   },
+    // },
+    // {
+    //   weight: 100,
+    //   value: (context, polygon, size) => {
+    //     context.fillStyle = clrs.red;
+    //     drawShape(context, polygon);
+    //     context.fill();
+    //     spaceFill(context, polygon, size, clrs.yellow);
+    //   },
+    // },
+    // {
+    //   weight: 100,
+    //   value: (context, polygon, size) => {
+    //     context.fillStyle = clrs.yellow;
+    //     drawShape(context, polygon);
+    //     context.fill();
+    //     spaceFill(context, polygon, size, clrs.pink);
+    //   },
+    // },
+    // {
+    //   weight: 100,
+    //   value: (context, polygon, size) => {
+    //     context.fillStyle = clrs.blue;
+    //     drawShape(context, polygon);
+    //     context.fill();
+    //     spaceFill(context, polygon, size, clrs.yellow);
+    //   },
+    // },
   ]);
 }
 
