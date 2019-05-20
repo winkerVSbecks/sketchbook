@@ -75,3 +75,5 @@ typings/
 tmp
 site/renders
 dist
+
+.DS_Store
