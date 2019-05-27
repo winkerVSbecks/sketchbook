@@ -1,6 +1,6 @@
 const hsluv = require('hsluv');
 
-const clrs = ['#3333ff', '#fc7f95', '#fbfc6e', '#55f9fc', '#fefefc'];
+const some = ['#3333ff', '#fc7f95', '#fbfc6e', '#55f9fc', '#fefefc'];
 
 function fillHsluv(h, s, l) {
   const rgb = hsluv.hsluvToRgb([h, s, l]);
@@ -82,6 +82,7 @@ const bilbao = [
 ];
 
 module.exports = {
+  some,
   hueCycle,
   pigments,
   spectrum,
