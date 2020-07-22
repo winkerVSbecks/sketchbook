@@ -1,3 +1,7 @@
+const Random = require('canvas-sketch-util/random');
+const Color = require('canvas-sketch-util/color');
+const risoColors = require('riso-colors').map((h) => h.hex);
+const paperColors = require('paper-colors').map((h) => h.hex);
 const hsluv = require('hsluv');
 
 const some = ['#3333ff', '#fc7f95', '#fbfc6e', '#55f9fc', '#fefefc'];
@@ -8,7 +12,7 @@ function fillHsluv(h, s, l) {
 }
 
 function spectrum() {
-  return [0, 1, 2, 3, 4, 5].map(i => fillHsluv(i * 25, 100, 50));
+  return [0, 1, 2, 3, 4, 5].map((i) => fillHsluv(i * 25, 100, 50));
 }
 
 function hueCycle(hueStart, t, sat = 0.75, light = 0.5) {
@@ -81,6 +85,23 @@ const bilbao = [
   '#CD202F',
 ];
 
+function clrs(minContrast = 3) {
+  const background = Random.pick(paperColors);
+
+  const inkColors = risoColors
+    .filter((color) => Color.contrastRatio(background, color) >= minContrast)
+    .filter((c) => c !== '#000000');
+
+  const ink = () => Random.pick(inkColors);
+
+  return {
+    bg: background,
+    paper: () => Random.pick(paperColors),
+    ink,
+    inkColors,
+  };
+}
+
 module.exports = {
   some,
   hueCycle,
@@ -90,4 +111,5 @@ module.exports = {
   ellsworthKelly,
   warm,
   bilbao,
+  clrs,
 };
