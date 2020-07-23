@@ -36,6 +36,7 @@
     "ml-som": "0.0.6",
     "p5": "^0.7.1",
     "paper-colors": "^1.0.0",
+    "point-in-polygon": "^1.0.1",
     "point-util": "0.0.0",
     "poisson-disc-sampler": "^1.1.0",
     "ramda": "^0.25.0",

@@ -5,6 +5,7 @@ const { linspace, lerpArray, lerp } = require('canvas-sketch-util/math');
 const Random = require('canvas-sketch-util/random');
 const RBush = require('rbush');
 const knn = require('rbush-knn');
+const inside = require('point-in-polygon');
 const clrs = require('./clrs').clrs();
 
 // You can force a specific seed by replacing this with a string value
@@ -22,6 +23,8 @@ const settings = {
   animate: true,
   dimensions: [800 * 2, 600 * 2],
   // duration: 12,
+  // fps: 24,
+  // playbackRate: 'throttle',
 };
 
 const config = {};
@@ -43,13 +46,7 @@ const sketch = (props) => {
   config.maxDistance = (width * 0.1) / scale; // maximum acceptable distance between two connected nodes (otherwise split)
 
   let path;
-  const margin = 0.25;
-  const bounds = [
-    width * margin,
-    width * (1 - margin),
-    height * margin,
-    height * (1 - margin),
-  ];
+  const bounds = createLine(5, width / 2, height / 2, width / 4);
 
   return {
     begin() {
@@ -58,7 +55,7 @@ const sketch = (props) => {
       tree.load(path);
     },
     render({ context }) {
-      iterate(tree, path, bounds);
+      iterate(tree, path, bounds, [width / 2, height / 2]);
 
       context.fillStyle = background;
       context.fillRect(0, 0, width, height);
@@ -80,10 +77,13 @@ const sketch = (props) => {
 
       context.strokeStyle = foreground;
       context.beginPath();
-      context.moveTo(bounds[0], bounds[2]);
-      context.lineTo(bounds[1], bounds[2]);
-      context.lineTo(bounds[1], bounds[3]);
-      context.lineTo(bounds[0], bounds[3]);
+      bounds.forEach(([x, y], idx) => {
+        if (idx === 0) {
+          context.moveTo(x, y);
+        } else {
+          context.lineTo(x, y);
+        }
+      });
       context.closePath();
       context.stroke();
 
@@ -144,13 +144,14 @@ class XYRBush extends RBush {
 }
 
 function createLine(count, x, y, r) {
-  return linspace(count, { endpoint: true }).map((idx) => [
-    x + r * Math.cos(Math.PI * 2 * idx),
-    y + r * Math.sin(Math.PI * 2 * idx),
+  const offset = -Math.PI / 2;
+  return linspace(count).map((idx) => [
+    x + r * Math.cos(offset + Math.PI * 2 * idx),
+    y + r * Math.sin(offset + Math.PI * 2 * idx),
   ]);
 }
 
-function iterate(tree, nodes, bounds) {
+function iterate(tree, nodes, bounds, centre) {
   tree.clear();
   // Generate tree from path nodes
   tree.load(nodes);
@@ -160,7 +161,7 @@ function iterate(tree, nodes, bounds) {
     applyRepulsion(idx, nodes, tree);
     applyAttraction(idx, nodes);
     applyAlignment(idx, nodes);
-    keepInBounds(idx, nodes, bounds);
+    keepInBounds(idx, nodes, bounds, centre);
   }
 
   splitEdges(nodes);
@@ -254,24 +255,13 @@ function applyAlignment(index, nodes) {
   nodes[index] = lerpArray(node, midpoint, config.alignmentForce);
 }
 
-function keepInBounds(idx, nodes, bounds) {
-  const [x, y] = nodes[idx];
-  let nx = x;
-  let ny = y;
+function keepInBounds(idx, nodes, bounds, centre) {
+  const node = nodes[idx];
+  const inBounds = inside(node, bounds);
 
-  if (x < bounds[0]) {
-    nx = bounds[0];
-  } else if (x > bounds[1]) {
-    nx = bounds[1];
+  if (!inBounds) {
+    nodes[idx] = lerpArray(node, centre, 0.01);
   }
-
-  if (y < bounds[2]) {
-    ny = bounds[2];
-  } else if (y > bounds[3]) {
-    ny = bounds[3];
-  }
-
-  nodes[idx] = [nx, ny];
 }
 
 function splitEdges(nodes) {
