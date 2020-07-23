@@ -20,10 +20,8 @@ const settings = {
   suffix: Random.getSeed(),
   scaleToView: true,
   animate: true,
-  dimensions: [800, 600],
-  // fps: 24,
-  // playbackRate: 'throttle',
-  // duration: 4,
+  dimensions: [800 * 2, 600 * 2],
+  // duration: 12,
 };
 
 const config = {};
@@ -37,29 +35,36 @@ const sketch = (props) => {
   const scale = 12;
   const forceMultiplier = 0.5;
   config.repulsionForce = 0.5 * forceMultiplier;
-  config.attractionForce = 0.2 * forceMultiplier;
-  config.alignmentForce = 0.45 * forceMultiplier;
+  config.attractionForce = 0.5 * forceMultiplier;
+  config.alignmentForce = 0.35 * forceMultiplier;
   config.brownianMotionRange = (width * 0.005) / scale;
-  config.leastMinDistance = (width * 0.02) / scale; // the closest comfortable distance between two vertices
+  config.leastMinDistance = (width * 0.03) / scale; // the closest comfortable distance between two vertices
   config.repulsionRadius = (width * 0.125) / scale; // the distance beyond which disconnected vertices will ignore each other
   config.maxDistance = (width * 0.1) / scale; // maximum acceptable distance between two connected nodes (otherwise split)
 
   let path;
+  const margin = 0.25;
+  const bounds = [
+    width * margin,
+    width * (1 - margin),
+    height * margin,
+    height * (1 - margin),
+  ];
 
   return {
     begin() {
-      path = createLine(20, width / 2, height / 2, (width * 0.0625) / 4);
+      path = createLine(6, width / 2, height / 2, width / 12);
       tree.clear();
       tree.load(path);
     },
     render({ context }) {
-      iterate(tree, path);
+      iterate(tree, path, bounds);
 
       context.fillStyle = background;
       context.fillRect(0, 0, width, height);
 
       context.fillStyle = foreground;
-      context.lineWidth = 4;
+      context.lineWidth = 12;
       context.lineJoin = 'round';
       context.beginPath();
 
@@ -73,6 +78,17 @@ const sketch = (props) => {
       context.closePath();
       context.fill();
 
+      context.strokeStyle = foreground;
+      context.beginPath();
+      context.moveTo(bounds[0], bounds[2]);
+      context.lineTo(bounds[1], bounds[2]);
+      context.lineTo(bounds[1], bounds[3]);
+      context.lineTo(bounds[0], bounds[3]);
+      context.closePath();
+      context.stroke();
+
+      // context.fillStyle = background;
+      // context.strokeStyle = foreground;
       // path.forEach(([x, y]) => {
       //   context.beginPath();
       //   context.ellipse(x, y, 1, 1, 0, 0, 2 * Math.PI);
@@ -134,7 +150,7 @@ function createLine(count, x, y, r) {
   ]);
 }
 
-function iterate(tree, nodes) {
+function iterate(tree, nodes, bounds) {
   tree.clear();
   // Generate tree from path nodes
   tree.load(nodes);
@@ -144,6 +160,7 @@ function iterate(tree, nodes) {
     applyRepulsion(idx, nodes, tree);
     applyAttraction(idx, nodes);
     applyAlignment(idx, nodes);
+    keepInBounds(idx, nodes, bounds);
   }
 
   splitEdges(nodes);
@@ -179,7 +196,8 @@ function applyRepulsion(idx, nodes, tree) {
     nodes[idx] = lerpArray(
       node,
       neighbour,
-      (-config.repulsionForce * d) / config.repulsionRadius
+      -config.repulsionForce
+      // (-config.repulsionForce * d) / config.repulsionRadius
     );
   });
 }
@@ -234,6 +252,26 @@ function applyAlignment(index, nodes) {
 
   // Move this point towards this midpoint
   nodes[index] = lerpArray(node, midpoint, config.alignmentForce);
+}
+
+function keepInBounds(idx, nodes, bounds) {
+  const [x, y] = nodes[idx];
+  let nx = x;
+  let ny = y;
+
+  if (x < bounds[0]) {
+    nx = bounds[0];
+  } else if (x > bounds[1]) {
+    nx = bounds[1];
+  }
+
+  if (y < bounds[2]) {
+    ny = bounds[2];
+  } else if (y > bounds[3]) {
+    ny = bounds[3];
+  }
+
+  nodes[idx] = [nx, ny];
 }
 
 function splitEdges(nodes) {
