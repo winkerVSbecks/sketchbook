@@ -20,6 +20,7 @@
   "dependencies": {
     "@ffmpeg-installer/ffmpeg": "^1.0.20",
     "animejs": "^3.0.1",
+    "bezier-js": "^2.6.1",
     "canvas-sketch": "^0.7.3",
     "canvas-sketch-cli": "^1.11.9",
     "canvas-sketch-util": "^1.10.0",
