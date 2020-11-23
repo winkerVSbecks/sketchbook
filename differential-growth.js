@@ -22,7 +22,8 @@ const settings = {
   scaleToView: true,
   animate: true,
   dimensions: [800 * 2, 600 * 2],
-  // duration: 12,
+  duration: 18,
+  fps: 24,
   // fps: 24,
   // playbackRate: 'throttle',
 };
@@ -46,11 +47,11 @@ const sketch = (props) => {
   config.maxDistance = (width * 0.1) / scale; // maximum acceptable distance between two connected nodes (otherwise split)
 
   let path;
-  const bounds = createLine(5, width / 2, height / 2, width / 4);
+  const bounds = createLine(6, width / 2, height / 2, width / 4);
 
   return {
     begin() {
-      path = createLine(6, width / 2, height / 2, width / 12);
+      path = createLine(50, width / 2, height / 2, width / 4);
       tree.clear();
       tree.load(path);
     },

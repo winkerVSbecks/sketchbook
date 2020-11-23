@@ -5,7 +5,8 @@ const clrs = require('./clrs').clrs();
 
 const settings = {
   dimensions: [800, 600],
-  orientation: 'landscape',
+  // dimensions: [1280, 720],
+  // orientation: 'landscape',
   scaleToView: true,
   animate: true,
   duration: 6,
@@ -37,13 +38,15 @@ const sketch = () => {
     const pingPongPlayhead = (idx) =>
       Math.abs(Math.sin(playhead * Math.PI + ((Math.PI / 4) * idx) / 6));
 
-    context.beginPath();
+    const w = margin * 2;
+
     [0, 1, 2, 3, 4, 5, 6].forEach((idx) => {
       drawBlock(context, {
-        x: margin + margin * 3 * idx,
+        x: margin + (w + margin) * idx,
         y: margin,
-        width: margin * 2,
-        height: height - margin * 2,
+        width: w,
+        height: height - w,
+        thickness: w * 0.002,
         playhead: Math.min(pingPongPlayhead(idx), 0.99),
       });
     });
@@ -68,10 +71,7 @@ function drawBlock(context, props) {
   const b1 = [x, mapRange(playhead, 0, 1, y + height * 1, y)];
   const b2 = [x + width, mapRange(playhead, 0, 1, y + height * 1, y)];
 
-  context.moveTo(x, y);
-  context.lineTo(x + width, y);
-
-  const edge1 = edge(b1, props);
+  const edge1 = edge(b1, props, false, true);
   const edge2 = edge(b2, props, true);
 
   const intersectionProps = intersections(edge1, edge2);
@@ -80,12 +80,17 @@ function drawBlock(context, props) {
   drawFrontEdge(context, edge1);
 }
 
-function edge(b, { x, y, width, height, playhead: rawPlayhead }, hiddenEdge) {
+function edge(
+  b,
+  { x, y, width, height, thickness, playhead: rawPlayhead },
+  hiddenEdge,
+  warp
+) {
   const playhead = hiddenEdge ? 1 - rawPlayhead : rawPlayhead;
 
   const [e1, e2] = edgeLocations({
     width,
-    thickness: width * 0.002,
+    thickness: thickness,
     playhead: playhead,
     x,
   });
@@ -93,7 +98,7 @@ function edge(b, { x, y, width, height, playhead: rawPlayhead }, hiddenEdge) {
   const a = [e1, y + height];
   const c = [e2, y + height];
   const ec1 = edgeCurve(b, a, rawPlayhead);
-  const ec2 = edgeCurve(b, c, rawPlayhead);
+  const ec2 = edgeCurve(b, c, rawPlayhead, warp);
 
   return { ec1, ec2, a, b, c };
 }
@@ -228,9 +233,11 @@ function edgeLocations({ x, width, thickness: s, playhead: t }) {
 }
 
 const K = 0.37;
-function edgeCurve([x1, y1], [x2, y2], playhead) {
+function edgeCurve([x1, y1], [x2, y2], playhead, warp) {
   const K1 = 0.37;
-  const K2 = lerpFrames([0, 0, 0.37], playhead);
+  const K2 = warp
+    ? lerpFrames([0, 0, 0.6], playhead)
+    : lerpFrames([0, 0, 0.37], playhead);
 
   const cp1 = [x1, y1 + K1 * (y2 - y1)];
   const cp2 = [x2, y2 - K2 * (y2 - y1)];
