@@ -1,5 +1,5 @@
 const canvasSketch = require('canvas-sketch');
-const { mapRange, lerpFrames } = require('canvas-sketch-util/math');
+const { mapRange, lerpFrames, lerp } = require('canvas-sketch-util/math');
 const Bezier = require('bezier-js');
 const clrs = require('./clrs').clrs();
 
@@ -20,8 +20,9 @@ const colors = {
   outline: '#70747c',
 };
 
-let activeState = 3;
+let activeState = 0;
 
+// 0 8 11
 const processStates = [
   {
     name: 'edge-curve-animated',
@@ -225,6 +226,9 @@ const sketch = () => {
     const pingPongPlayhead = (idx) =>
       Math.abs(Math.sin(playhead * Math.PI + ((Math.PI / 4) * idx) / 6));
 
+    // const pingPongPlayhead = () => Math.abs(Math.sin(playhead * Math.PI * 3));
+    // activeState = [0, 10, 11][Math.floor(lerp(0, 3, playhead))];
+
     const w = margin * 2;
 
     process = processStates[activeState].state;
@@ -255,8 +259,8 @@ canvasSketch(sketch, settings);
  */
 function drawBlock(context, props) {
   const { x, y, width, height, playhead } = props;
-  const b1 = [x, mapRange(playhead, 0, 1, y + height * 1, y)]; // end point 1
-  const b2 = [x + width, mapRange(playhead, 0, 1, y + height * 1, y)]; // end point 2
+  const b1 = [x, mapRange(playhead, 0, 1, y + height * 1, y)]; // start point 1
+  const b2 = [x + width, mapRange(playhead, 0, 1, y + height * 1, y)]; // start point 2
 
   const edge1 = edge(
     b1,
@@ -392,28 +396,28 @@ function drawFaces(
       context.fill();
       context.stroke();
 
-      drawNode(context, { x: U[0], y: U[1] }, '(x2, y2)', 'left');
-      drawNode(context, s, '(x1, y1)');
+      drawNode(context, { x: U[0], y: U[1] }, '(x1, y1)', 'left');
+      drawNode(context, s, '(x2, y2)');
     }
 
     if (process.debugCurve) {
       context.fillStyle = colors.outline;
       context.lineWidth = 3;
-      const cp2 = curve3.points[1];
-      const cp1 = curve3.points[2];
+      const cp1 = curve3.points[1];
+      const cp2 = curve3.points[2];
 
       context.beginPath();
       context.moveTo(p.x, p.y);
-      context.lineTo(cp2.x, cp2.y);
+      context.lineTo(cp1.x, cp1.y);
 
       context.moveTo(s.x, s.y);
-      context.lineTo(cp1.x, cp1.y);
+      context.lineTo(cp2.x, cp2.y);
       context.stroke();
 
-      drawNode(context, p, '(x2, y2)', 'left');
-      drawNode(context, cp1, 'cp1');
-      drawNode(context, cp2, 'cp2', 'left');
-      drawNode(context, s, '(x1, y1)');
+      drawNode(context, p, '(x1, y1)', 'left');
+      drawNode(context, cp1, 'cp1', 'left');
+      drawNode(context, cp2, 'cp2');
+      drawNode(context, s, '(x2, y2)');
     }
   }
 }

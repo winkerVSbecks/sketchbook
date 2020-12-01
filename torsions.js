@@ -5,8 +5,6 @@ const clrs = require('./clrs').clrs();
 
 const settings = {
   dimensions: [800, 600],
-  // dimensions: [1280, 720],
-  // orientation: 'landscape',
   scaleToView: true,
   animate: true,
   duration: 6,
@@ -38,7 +36,7 @@ const sketch = () => {
     const pingPongPlayhead = (idx) =>
       Math.abs(Math.sin(playhead * Math.PI + ((Math.PI / 4) * idx) / 6));
 
-    const w = margin * 2;
+    const w = width / 11;
 
     [0, 1, 2, 3, 4, 5, 6].forEach((idx) => {
       drawBlock(context, {
@@ -68,6 +66,7 @@ canvasSketch(sketch, settings);
  */
 function drawBlock(context, props) {
   const { x, y, width, height, playhead } = props;
+  // Start points for the edge curves
   const b1 = [x, mapRange(playhead, 0, 1, y + height * 1, y)];
   const b2 = [x + width, mapRange(playhead, 0, 1, y + height * 1, y)];
 
@@ -84,21 +83,21 @@ function edge(
   b,
   { x, y, width, height, thickness, playhead: rawPlayhead },
   hiddenEdge,
-  warp
+  perspective
 ) {
   const playhead = hiddenEdge ? 1 - rawPlayhead : rawPlayhead;
 
-  const [e1, e2] = edgeLocations({
+  const [aX, cX] = bottomVerticesX({
     width,
     thickness: thickness,
     playhead: playhead,
     x,
   });
 
-  const a = [e1, y + height];
-  const c = [e2, y + height];
+  const a = [aX, y + height];
+  const c = [cX, y + height];
   const ec1 = edgeCurve(b, a, rawPlayhead);
-  const ec2 = edgeCurve(b, c, rawPlayhead, warp);
+  const ec2 = edgeCurve(b, c, rawPlayhead, perspective);
 
   return { ec1, ec2, a, b, c };
 }
@@ -177,6 +176,9 @@ function drawFaces(
   }
 }
 
+/**
+ * Draw the thick edge
+ */
 function drawFrontEdge(context, { ec1, ec2, a, b, c }) {
   context.beginPath();
   context.moveTo(...b);
@@ -191,6 +193,13 @@ function drawFrontEdge(context, { ec1, ec2, a, b, c }) {
 }
 
 /**
+ * Find intersections between curve pairs
+ *
+ * Remember we are drawing double curves, so
+ * we find intersection between outside curve
+ * from one side and inside curve from the other
+ *
+ *
  * curve1 curve3 curve2 curve4
  */
 function intersections(edge1, edge2) {
@@ -221,7 +230,11 @@ function intersections(edge1, edge2) {
   };
 }
 
-function edgeLocations({ x, width, thickness: s, playhead: t }) {
+/**
+ * Calculate the X component for
+ * the bottom vertices
+ */
+function bottomVerticesX({ x, width, thickness: s, playhead: t }) {
   const angle = Math.PI + Math.PI * t;
   const r = width / 2;
 
@@ -232,10 +245,13 @@ function edgeLocations({ x, width, thickness: s, playhead: t }) {
   return [p1[0], p2[0]];
 }
 
-const K = 0.37;
-function edgeCurve([x1, y1], [x2, y2], playhead, warp) {
+/**
+ * The bezier curve definition for the edge curve
+ * Returns the two control points and the end point
+ */
+function edgeCurve([x1, y1], [x2, y2], playhead, perspective) {
   const K1 = 0.37;
-  const K2 = warp
+  const K2 = perspective
     ? lerpFrames([0, 0, 0.6], playhead)
     : lerpFrames([0, 0, 0.37], playhead);
 
@@ -245,6 +261,13 @@ function edgeCurve([x1, y1], [x2, y2], playhead, warp) {
   return [...cp1, ...cp2, x2, y2];
 }
 
+/**
+ * A little utility to draw bezier curves
+ * Simply moves to the start point then
+ * calls the curve command
+ *
+ * Optionally allows you to draw the curve in reverse
+ */
 function drawBezierCurve(
   context,
   curve,
