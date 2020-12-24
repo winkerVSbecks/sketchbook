@@ -122,7 +122,7 @@ export function createParticle({ width, height }, maxDist, opts) {
   };
 }
 
-export function updateParticle(canvasEl, tick, particle) {
+export function updateParticle({ width, height }, tick, particle) {
   // Move
   particle.x += Math.cos(particle.angle) * particle.velocity;
   if (DEBUG.wobble) {
@@ -154,7 +154,7 @@ export function updateParticle(canvasEl, tick, particle) {
       );
   }
 
-  if (particle.y > canvasEl.height / 2) {
+  if (particle.y > height) {
     particle.alive = false;
   }
 
@@ -205,10 +205,7 @@ export function drawParticle(context, tick, particle) {
 }
 
 export function resetParticles({ width, height }, x, y, particles, options) {
-  const w = width / 2;
-  const h = height / 2;
-
-  const maxDist = dist([0, 0], [w, h]);
+  const maxDist = dist([0, 0], [width, height]);
 
   return particles.map(() =>
     createParticle({ width, height }, maxDist, { ...options, x, y })
