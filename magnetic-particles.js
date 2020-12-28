@@ -23,12 +23,11 @@ const CONFIG = {
 };
 
 const sketch = async () => {
-  const image = await load('./imgs/cloud-1.jpg');
+  const image = await load('./imgs/e267d9be51f1096b2dd901db693a55ec.png');
 
   let particles, planets, poissonDiskSamples;
-  const foreground = clrs.ink(); // '#666';
-  const foreground2 = clrs.ink(); // '#666';
-  const background = clrs.bg; // '#fff';
+  const foreground = clrs.ink(); // '#fff';
+  const background = clrs.bg; // '#000';
 
   return {
     begin({ context, width, height }) {
@@ -174,7 +173,8 @@ function drawParticle(particle, context, color, size) {
 function gravitationalForce(p1, p2) {
   const d2 = distSq(p1.loc, p2.loc);
   const F = (CONFIG.G * p1.m * p2.m) / d2;
-  return -(F > 100 ? 200000 : F);
+  return -Math.min(F, 200);
+  // return -(F > 100 ? 200000 : F);
 }
 
 function dist({ x: x1, y: y1 }, { x: x2, y: y2 }) {

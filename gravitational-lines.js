@@ -77,12 +77,6 @@ const sketch = async ({ width, height }) => {
       context.stroke();
     });
 
-    // context.strokeStyle = clrs.ink();
-    // lines2.forEach((line) => {
-    //   drawShape(context, line, false);
-    //   context.stroke();
-    // });
-
     planets.forEach((planet) => {
       drawParticle(planet, context, background, planet.m / 50);
     });
