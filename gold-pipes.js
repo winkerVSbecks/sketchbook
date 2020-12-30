@@ -1,8 +1,11 @@
 const canvasSketch = require('canvas-sketch');
-const { linspace } = require('canvas-sketch-util/math');
+const { linspace, mapRange } = require('canvas-sketch-util/math');
+const Random = require('canvas-sketch-util/random');
 
 const settings = {
-  dimensions: [1600, 1200],
+  dimensions: [1600, 1600],
+  // animate: true,
+  duration: 4,
 };
 
 const colors = {
@@ -11,63 +14,140 @@ const colors = {
   bg: '#171717',
 };
 
-const tan30 = Math.tan(Math.PI / 6);
-const tan60 = Math.tan(Math.PI / 3);
+const angle = Math.PI / 6;
 
 const sketch = () => {
-  return ({ context, width, height }) => {
-    context.fillStyle = colors.bg;
-    context.fillRect(0, 0, width, height);
+  const w = 20;
+  const m = 10;
+  const margin = w * m;
+  let xCount, yCount, pipes;
 
-    const w = 20;
-    const m = 6;
-    const margin = w * m;
-    const xCount = width / w;
+  return {
+    begin({ width, height }) {
+      xCount = width / w;
+      yCount = height / w;
 
-    linspace(xCount - 2 * m).forEach((_, idx) => {
-      lineVertical(context, w, m + idx, [height - margin, margin]);
-    });
+      pipes = linspace(5).map(() => {
+        const x = randomLocation(m, xCount - 2 * m);
+        const size = randomSize(x, [m, xCount - m], [6, 12]);
+        return {
+          x,
+          size,
+          y: [yCount - m, yCount - Random.rangeFloor(1 * m, 5 * m)],
+        };
+      });
+    },
+    render({ context, width, height, playhead }) {
+      context.fillStyle = colors.bg;
+      context.fillRect(0, 0, width, height);
 
-    // context.lineJoin = 'miter';
-    // context.lineCap = 'square';
+      // Bg lines
+      linspace(xCount - (2 * m - 1)).forEach((_, idx) => {
+        context.strokeStyle = idx % 2 === 0 ? colors.light : colors.bg;
+        context.beginPath();
+        lineVertical(context, w, m + idx, [height - margin, margin]);
+        context.stroke();
+      });
 
-    lineVertical(context, w, 10, [height - margin, height / 2], 'dark', 'LTR');
-    lineLTR(context, w, { idx: 10, span: 3, y: height / 2, shade: 'dark' });
+      context.lineJoin = 'miter';
+      context.lineCap = 'butt';
 
-    lineVertical(context, w, 12, [height - margin, height / 2], 'dark', 'LTR');
-    lineLTR(context, w, { idx: 12, span: 1, y: height / 2, shade: 'dark' });
+      pipes
+        .sort((a, b) => a.y[1] - b.y[1])
+        .forEach((pipe) => {
+          drawPipe(context, w, pipe);
+          // drawPipe(context, w, {
+          //   ...pipe,
+          //   y: [pipe.y[0], mapRange(playhead, 0, 1, pipe.y[0], pipe.y[1])],
+          // });
+        });
+    },
   };
 };
 
 canvasSketch(sketch, settings);
 
-function lineVertical(context, w, idx, [yStart, yEnd], shade = 'light', cap) {
-  context.fillStyle = idx % 2 === 0 ? colors[shade] : colors.bg;
-  context.beginPath();
-  context.moveTo(w * idx, yEnd);
-  context.lineTo(w * idx, yStart);
-  context.lineTo(w * (idx + 1), yStart);
-  context.lineTo(w * (idx + 1), yEnd);
+function lineVertical(context, w, x, [yStart, yEnd], move = true) {
+  context.lineWidth = w;
+  if (move) {
+    context.moveTo(w * x, yStart);
+  }
+  context.lineTo(w * x, yEnd);
+}
 
-  // if (cap === 'LTR') {
-  //   context.lineTo(w * idx, yEnd - w * tan30);
-  // }
+function lineDiagonal(context, w, { x, y, span = 1, direction = 'up' }) {
+  context.lineWidth = w;
+  const sign = direction === 'up' ? 1 : -1;
+  context.lineTo(
+    w * sign * (x + span),
+    y - sign * Math.tan(angle) * (w * span)
+  );
+}
+
+function drawPipe(context, w, { x, size, y: [yStart, yEnd], open = true }) {
+  const h = Math.tan(angle) * w;
+
+  // plug the middle
+  context.beginPath();
+  context.strokeStyle = colors.bg;
+  lineVertical(context, w, x, [yStart * w, yEnd * w - h]);
+  context.stroke();
+
+  // Draw the rest of the pipe around it
+  linspace(size).forEach((_, idx) => {
+    const step = idx + 1;
+    const yOff = h * step;
+
+    context.beginPath();
+    context.strokeStyle = (x + step) % 2 === 0 ? colors.light : colors.bg;
+    lineVertical(context, w, x - step, [yStart * w, yEnd * w - yOff]);
+    lineDiagonal(context, w, {
+      x: x - step,
+      y: yEnd * w - yOff,
+      span: step,
+      direction: 'up',
+    });
+    context.lineTo(w * (x + step), yEnd * w - yOff);
+    lineVertical(context, w, x + step, [yEnd * w - yOff, yStart * w], false);
+    context.stroke();
+  });
+
+  // Perspective colouring
+  context.fillStyle = `rgba(23, 23, 23, 0.5)`;
+  if (open) {
+    // inside
+    context.beginPath();
+    context.moveTo(w * x, yEnd * w);
+    context.lineTo(w * x, yEnd * w - 2 * h * size);
+    context.lineTo(w * (x + size), yEnd * w - h * size);
+    context.closePath();
+    context.fill();
+  }
+  // outside
+  context.beginPath();
+  context.moveTo(w * x, yEnd * w);
+  context.lineTo(w * x, yStart * w);
+  context.lineTo(w * (x - size), yStart * w);
+  context.lineTo(w * (x - size), yEnd * w - h * size);
   context.closePath();
   context.fill();
 }
 
-function lineLTR(context, w, { idx, span, y, shade = 'light' }) {
-  context.fillStyle = idx % 2 === 0 ? colors[shade] : colors.bg;
-  context.beginPath();
-  context.moveTo(w * (idx + span + 0.5), y - w * (span + 0.5) * tan30);
-  context.lineTo(w * (idx + 1), y);
-  context.lineTo(w * idx, y);
-  context.lineTo(w * idx, y - w * tan30);
-  context.lineTo(
-    w * (idx + span + 0.5),
-    y - w * tan30 - (span + 0.5) * w * tan30
-  );
-  context.closePath();
-  context.fill();
-  context.stroke();
+function randomLocation(min, max) {
+  const t = Random.rangeFloor(min, max);
+  return t % 2 === 0 ? t + 1 : t;
+}
+
+function randomSize(x, [xMin, xMax], [min, max]) {
+  let t = Random.rangeFloor(min, max);
+  t = t % 2 === 0 ? t : t + 1;
+
+  if (x + t > xMax) {
+    t = t - (x + t - xMax);
+    return t % 2 === 0 ? t : t + 1;
+  } else if (x - t < xMin) {
+    t = t - (xMin - (x - t));
+    return t % 2 === 0 ? t : t + 1;
+  }
+  return t;
 }
