@@ -1,16 +1,17 @@
 const canvasSketch = require('canvas-sketch');
-const { linspace, lerpArray } = require('canvas-sketch-util/math');
+const { linspace, lerpArray, lerpFrames } = require('canvas-sketch-util/math');
 const eases = require('eases');
 const Random = require('canvas-sketch-util/random');
 
 const settings = {
   dimensions: [2048, 2048],
   animate: true,
-  duration: 2,
+  duration: 4,
 };
 
 const sketch = ({ width, height }) => {
   const R = width / 4;
+  // const center = [0, 0 + R / 4];
   const center = [width / 2, height / 2 + R / 4];
 
   const [a, b, c] = triangle(center, R);
@@ -46,14 +47,19 @@ const sketch = ({ width, height }) => {
 
     context.strokeStyle = '#333';
     context.fillStyle = '#333';
-    const pingPonPlayhead = Math.sin(Math.PI * playhead);
-    const t = eases.expoInOut(pingPonPlayhead);
+    const pingPonPlayhead = lerpFrames([0, 1, 0], playhead); // Math.sin(Math.PI * playhead);
+    const t = eases.sineInOut(pingPonPlayhead);
+
+    // const scale = mapRange(pingPonPlayhead, 0, 1, 1, 1.1);
+    // context.translate(width / 2, height / 2);
+    // context.scale(scale, scale);
     paths.forEach((path) => {
       const p = path.from.map((pt, idx) => lerpArray(pt, path.to[idx], t));
 
       drawPath(context, p);
       context.fill();
     });
+    // context.setTransform(1, 0, 0, 1, 0, 0);
   };
 };
 
