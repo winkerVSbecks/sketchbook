@@ -1,0 +1,14 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../penplot-sketches"
+		},
+		{
+			"path": "../3d-sketches"
+		}
+	],
+	"settings": {}
+}

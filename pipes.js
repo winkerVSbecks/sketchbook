@@ -6,7 +6,7 @@ const { drawShape } = require('./geometry');
 const settings = {
   animate: true,
   duration: 6,
-  dimensions: [800, 600],
+  dimensions: [800, 800],
   scaleToView: true,
 };
 
@@ -21,7 +21,7 @@ const PALETTE = Random.shuffle([
 ]);
 const GRID_SIZE = 16;
 
-const sketch = async app => {
+const sketch = async (app) => {
   const { canvas } = app;
 
   // Take a background color
@@ -117,26 +117,29 @@ function pipeOfLength(length = 6) {
   ];
 
   return linspace(length).reduce(
-    polyline => {
+    (polyline) => {
       const dir = randomDir(prevDir);
       const a = polyline[polyline.length - 1];
 
-      const b = dir.map(v => v * Random.rangeFloor(1, 3));
+      const b = dir.map((v) => v * Random.rangeFloor(1, 3));
       prevDir = dir;
       return polyline.concat([
         [clampToGrid(b[0] + a[0]), clampToGrid(b[1] + a[1])],
       ]);
     },
-    [start],
+    [start]
   );
 }
 
 function randomDir(prevDir) {
-  const prev = prevDir.map(v => v * -1);
+  const prev = prevDir.map((v) => v * -1);
   return Random.pick(
-    [[1, 0], [0, 1], [-1, 0], [0, -1]].filter(
-      dir => !(prev && dir[0] === prev[0] && dir[1] === prev[1]),
-    ),
+    [
+      [1, 0],
+      [0, 1],
+      [-1, 0],
+      [0, -1],
+    ].filter((dir) => !(prev && dir[0] === prev[0] && dir[1] === prev[1]))
   );
 }
 
