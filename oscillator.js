@@ -25,14 +25,16 @@ const sketch = (props) => {
   );
 
   const margin = 0.05 * width;
-  const RESOLUTION = [64 + 16, 64 + 16];
+  const RESOLUTION = [64 + 32, 64 + 32];
 
   const clipBox = [
     [margin, margin],
     [width - margin, height - margin],
   ];
 
-  const o = [0, 0.5, 0.5];
+  const origin = [0, 0.5, 0.5];
+  const offset = [0, 0, 0]; // [0.25, 0, 0];
+  const scale = 1; // 2;
 
   return ({ context, width, height, playhead }) => {
     context.fillStyle = colors.bg;
@@ -47,8 +49,20 @@ const sketch = (props) => {
           const v1 = -0.5 + y / (RESOLUTION[1] - 1);
           const v2 = -0.5 + (y - 1) / (RESOLUTION[1] - 1);
 
-          const [point1, point2] = getPoints([u1, v1], o, shift);
-          const [point3, point4] = getPoints([u1, v2], o, shift);
+          const [point1, point2] = getPoints(
+            [u1, v1],
+            origin,
+            offset,
+            scale,
+            shift
+          );
+          const [point3, point4] = getPoints(
+            [u1, v2],
+            origin,
+            offset,
+            scale,
+            shift
+          );
 
           renderer.line(context, point1, point3, colors.x, 4);
           renderer.line(context, point2, point4, colors.x, 4);
@@ -60,27 +74,24 @@ const sketch = (props) => {
 
 canvasSketch(sketch, settings);
 
-function getPoints([u, v], o, shift) {
+function getPoints([u, v], o, offset, scale, shift) {
   const p1 = [u, v];
   const d1 = ((o[0] - p1[0]) ** 2 + (o[2] - p1[1])) ** 2;
-  const t1 = Math.sin(shift + lerp(0, Math.PI * 5, d1));
-  const point1 = [p1[0], o[1] + 0.05 * t1, p1[1]];
+  const t1 = Math.sin(shift + lerp(0, Math.PI * 5, d1 * scale));
+  const point1 = [
+    offset[0] + p1[0] * scale,
+    offset[1] + o[1] + 0.05 * t1,
+    offset[2] + p1[1] * scale,
+  ];
 
   const p2 = [v, u];
   const d2 = ((o[0] - p2[0]) ** 2 + (o[2] - p2[1])) ** 2;
-  const t2 = Math.sin(shift + lerp(0, Math.PI * 5, d2));
-  const point2 = [p2[0], o[1] + 0.05 * t2, p2[1]];
+  const t2 = Math.sin(shift + lerp(0, Math.PI * 5, d2 * scale));
+  const point2 = [
+    offset[0] + p2[0] * scale,
+    offset[1] + o[1] + 0.05 * t2,
+    offset[2] + p2[1] * scale,
+  ];
 
   return [point1, point2];
-}
-
-function drawShape(context, [start, ...pts], closed = true) {
-  context.beginPath();
-  context.moveTo(...start);
-  pts.forEach((pt) => {
-    context.lineTo(...pt);
-  });
-  if (closed) {
-    context.closePath();
-  }
 }

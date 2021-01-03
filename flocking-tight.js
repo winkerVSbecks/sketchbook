@@ -13,11 +13,9 @@ const settings = {
 };
 
 const CONFIG = {
-  neighbourDist: 50,
-  desiredSeparation: 25,
+  neighbourDist: 200,
+  desiredSeparation: 75,
 };
-
-const scale = 2;
 
 canvasSketch(() => {
   console.clear();
@@ -30,7 +28,7 @@ canvasSketch(() => {
     },
     render({ context, width, height, playhead }) {
       context.clearRect(0, 0, width, height);
-      context.fillStyle = '#f1f8fd';
+      context.fillStyle = '#222';
       context.fillRect(0, 0, width, height);
       const handleScreenBoundaries = handleBoundaries(width, height);
 
@@ -68,12 +66,12 @@ function boidOf(x, y) {
     acceleration: new Vector(0, 0),
     velocity: new Vector(Random.range(-1, 1), Random.range(-1, 1)),
     position: new Vector(x, y),
-    r: Random.range(2, 4) * scale,
-    maxSpeed: 3 * scale,
-    maxForce: 0.05 * scale,
+    r: 10,
+    maxSpeed: 6,
+    maxForce: 1,
     trail: [],
     trailLength: Random.range(25, 60),
-    color: Random.pick(warm),
+    color: 'white',
   };
 }
 
@@ -87,8 +85,8 @@ function move(boids, boid) {
 
   // Weight these forces
   separation.mult(2);
-  alignment.mult(1.0);
-  bond.mult(1.0);
+  alignment.mult(1);
+  bond.mult(1);
 
   // Add the force vectors to acceleration
   boid.acceleration.add(separation);
@@ -120,26 +118,34 @@ function update(boid) {
  * Render the boid
  * A triangle rotated in the direction of the velocity
  */
-function render(boid, context, width, height, color) {
-  const theta = boid.velocity.heading() + Math.PI / 2;
+function render(boid, context) {
+  const theta = boid.velocity.heading();
 
-  context.fillStyle = boid.color; //'#fff';
-  context.strokeStyle = boid.color; //'#fff';
+  context.fillStyle = '#222'; //'#fff';
+  context.strokeStyle = '#ffbd88'; // boid.color; // '#222';
   context.lineWidth = boid.r;
+  const { x, y } = boid.position;
+  const r = boid.r * 2;
 
-  const chunks = splitPath(boid, width, height);
-
-  chunks.forEach((chunk) => {
-    if (chunk.length > 1) {
-      context.beginPath();
-      drawShape(context, chunk, false);
-      context.stroke();
-    }
-  });
+  // context.translate(x, y);
+  // context.rotate(theta - Math.PI / 2);
+  // context.beginPath();
+  // context.moveTo(r * Math.cos(0), r * Math.sin(0));
+  // context.lineTo(
+  //   r * Math.cos((2 * Math.PI * 1) / 3),
+  //   r * Math.sin((2 * Math.PI * 1) / 3)
+  // );
+  // context.lineTo(
+  //   r * Math.cos((2 * Math.PI * 2) / 3),
+  //   r * Math.sin((2 * Math.PI * 2) / 3)
+  // );
+  // context.closePath();
 
   context.beginPath();
-  context.arc(boid.position.x, boid.position.y, boid.r * 1.25, 0, 2 * Math.PI);
+  context.arc(x, y, boid.r, 0, 2 * Math.PI);
   context.fill();
+  context.setTransform(1, 0, 0, 1, 0, 0);
+  context.stroke();
 }
 
 /**
@@ -242,21 +248,22 @@ function seek(target, boid) {
  */
 function handleBoundaries(width, height) {
   return (boid) => {
+    const r = boid.r;
     // Left
-    if (boid.position.x < -boid.r) {
-      boid.position.x = width + boid.r;
+    if (boid.position.x < -r) {
+      boid.position.x = width + r;
     }
     // Top
-    if (boid.position.y < -boid.r) {
-      boid.position.y = height + boid.r;
+    if (boid.position.y < -r) {
+      boid.position.y = height + r;
     }
     // Right
-    if (boid.position.x > width + boid.r) {
-      boid.position.x = -boid.r;
+    if (boid.position.x > width + r) {
+      boid.position.x = -r;
     }
     // Bottom
-    if (boid.position.y > height + boid.r) {
-      boid.position.y = -boid.r;
+    if (boid.position.y > height + r) {
+      boid.position.y = -r;
     }
   };
 }
