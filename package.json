@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "canvas-sketch --output=renders --stream=gif --fps=24 --open",
-    "start:mp4": "canvas-sketch --output=renders --stream --open",
+    "mp4": "canvas-sketch --output=renders --stream --open",
     "gif": "canvas-sketch-gif tmp/",
     "postgif": "rm -rf tmp/",
     "site": "x0 site --open",

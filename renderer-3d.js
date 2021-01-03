@@ -33,7 +33,7 @@ class Renderer3D {
   constructor(
     d,
     angles = { x: Math.atan(1 / 2 ** 0.5), y: 0, z: Math.PI / 4 },
-    scale,
+    scale
   ) {
     this.d = d;
     this.scale = scale;
@@ -77,7 +77,10 @@ class Renderer3D {
   // http://www.petercollingridge.co.uk/tutorials/svg/isometric-projection/
   convert3dTo2d(vertex) {
     let rotated = matrixMultiply(this.rotationX, this.rotationY);
-    rotated = matrixMultiply(rotated, vertex.map(v => [v]));
+    rotated = matrixMultiply(
+      rotated,
+      vertex.map((v) => [v])
+    );
 
     // prettier-ignore
     const projection = [
@@ -85,7 +88,7 @@ class Renderer3D {
       [0, this.d, 0],
     ];
 
-    return matrixMultiply(projection, rotated).map(v => (v * this.scale) / 4);
+    return matrixMultiply(projection, rotated).map((v) => (v * this.scale) / 4);
   }
 
   cube(context, size, stroke) {
