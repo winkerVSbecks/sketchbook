@@ -8,15 +8,16 @@ const { beat } = require('../easings');
 const settings = {
   animate: true,
   duration: 6,
-  dimensions: [800, 600],
+  dimensions: [1600, 1600],
   scaleToView: true,
 };
 
 canvasSketch(() => {
   Random.permuteNoise();
   const intervals = linspace(12);
+  const lineWidth = 12;
 
-  return props => {
+  return (props) => {
     const { width, height } = props;
     const size = height * 0.8;
     const offset = [(width - size) / 2, (height - size) / 2];
@@ -29,7 +30,7 @@ canvasSketch(() => {
 
   function drawIsolines(
     { context, width, height, playhead },
-    { size, offset, padding },
+    { size, offset, padding }
   ) {
     context.clearRect(0, 0, width, height);
     context.fillStyle = '#001';
@@ -61,7 +62,7 @@ canvasSketch(() => {
     }
 
     context.strokeStyle = '#fff';
-    context.lineWidth = 4;
+    context.lineWidth = lineWidth;
     context.lineJoin = 'round';
 
     intervals.forEach((step, idx) => {
@@ -74,7 +75,7 @@ canvasSketch(() => {
           upperBand - lowerBand,
           {
             successCallback(bands) {
-              bands.forEach(band => {
+              bands.forEach((band) => {
                 const scaledBand = band.map(([x, y]) => [
                   offset[0] + mapRange(x, 0, 99, padding, size - padding),
                   offset[1] + mapRange(y, 0, 99, padding, size - padding),
@@ -85,7 +86,7 @@ canvasSketch(() => {
             },
             // linearRing: false,
             noQuadTree: true,
-          },
+          }
         );
       }
     });
@@ -97,11 +98,11 @@ canvasSketch(() => {
       offset[0] + padding * 0.8,
       offset[1] + padding * 0.8,
       size - 1.6 * padding,
-      size - 1.6 * padding,
+      size - 1.6 * padding
     );
     context.strokeStyle = '#fff';
     context.lineJoin = 'miter';
-    context.lineWidth = 6;
+    context.lineWidth = lineWidth + 2;
     context.stroke();
     context.closePath();
 
@@ -110,17 +111,17 @@ canvasSketch(() => {
       offset[0] + padding,
       offset[1] + padding,
       size - 2 * padding,
-      size - 2 * padding,
+      size - 2 * padding
     );
     context.strokeStyle = '#000';
-    context.lineWidth = 6;
+    context.lineWidth = lineWidth + 2;
     context.stroke();
     context.closePath();
   }
 
   function drawLabel(
     { context, width, height, playhead, duration },
-    { size, offset, padding },
+    { size, offset, padding }
   ) {
     const opacity = 1 - beat(playhead, 0.5, duration * 10);
 
@@ -130,10 +131,10 @@ canvasSketch(() => {
     context.textBaseline = 'top';
     context.fillText(
       `C O N T O U R                 ${Math.abs(
-        Random.noise1D(playhead),
+        Random.noise1D(playhead)
       ).toFixed(2)}°`,
       padding * 0.8 + offset[0],
-      offset[1] + size - padding * 0.4,
+      offset[1] + size - padding * 0.4
     );
   }
 }, settings);

@@ -37,16 +37,16 @@ const CONFIGS = {
     m: 0,
     a: 1,
     b: 1,
-    range: range(24).filter(x => x % 2 === 0),
+    range: range(24).filter((x) => x % 2 === 0),
     duration: 1.4,
     angle: Math.PI * 2,
   },
 };
 
-const params = CONFIGS.loops;
+const params = CONFIGS.bigBang;
 
 const settings = {
-  dimensions: [800, 800],
+  dimensions: [1600, 1600],
   animate: true,
   duration: params.duration,
   scaleToView: true,
@@ -66,14 +66,14 @@ const sketch = () => {
       context.lineJoin = 'bevel';
 
       const radius = width / 3;
-      const total = 200;
+      const total = 500;
 
       polylines = linspace(total, true)
-        .map(x => params.angle * x)
-        .map(angle => {
+        .map((x) => params.angle * x)
+        .map((angle) => {
           let polyline = [];
 
-          params.range.forEach(i => {
+          params.range.forEach((i) => {
             params.m = i;
             const r = supershape(params, angle);
             const x = radius * r * Math.cos(angle);
@@ -92,6 +92,7 @@ const sketch = () => {
       context.lineJoin = 'bevel';
 
       context.translate(width / 2, height / 2);
+      context.lineWidth = 4;
       context.strokeStyle = chroma.random();
 
       let start;

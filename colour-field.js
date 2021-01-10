@@ -13,7 +13,7 @@ const simplex = new SimplexNoise('81234n32478320');
 const settings = {
   animate: true,
   duration: 8,
-  dimensions: [800, 600],
+  dimensions: [1600, 1600],
   scaleToView: true,
   // playbackRate: 'throttle',
   // fps: 24,
@@ -41,7 +41,7 @@ canvasSketch(() => {
     const padding = height * 0.15;
     const tileSize = (height - padding * 2) / gridSize;
     const length = tileSize * 0.65;
-    const thickness = tileSize * 0.05;
+    const thickness = tileSize * 0.1;
     const time = Math.sin(playhead * 2 * Math.PI);
     z = z + 0.01;
 
@@ -62,7 +62,7 @@ canvasSketch(() => {
         const clr = simplex.noise3D(
           x / (gridSize * 2) + 10000,
           y / (gridSize * 2) + 10000,
-          time,
+          time
         );
         context.fillStyle = colourScale(clr);
 
@@ -74,12 +74,12 @@ canvasSketch(() => {
             simplex.noise3D(
               x / (gridSize * 2) + 10000,
               y / (gridSize * 2) + 10000,
-              time,
+              time
             ),
             -1,
             1,
             -0.5,
-            1,
+            1
           ) *
             length) /
             2;

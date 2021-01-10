@@ -9,7 +9,7 @@ const wordShuffler = require('./word-shuffler');
 const { code, output } = require('./text');
 
 const settings = {
-  dimensions: [800, 600],
+  dimensions: [1600, 1600],
   animate: true,
   duration: 6,
   scaleToView: true,
@@ -22,7 +22,7 @@ const renderer = new Renderer3D(
     z: 0,
     y: Math.PI / 4,
   },
-  settings.dimensions[0],
+  settings.dimensions[0]
 );
 
 const sketch = () => {
@@ -160,13 +160,13 @@ const sketch = () => {
         anms.grids.bottom,
         A,
         anms.grids.stroke,
-        gridScrollSmall.x,
+        gridScrollSmall.x
       );
       drawIsolines(
         context,
         playhead,
         { y: anms.isolines.y, size: A, offset: [0, 0] },
-        anms.isolines.opacity,
+        anms.isolines.opacity
       );
       drawGrid(
         context,
@@ -174,7 +174,7 @@ const sketch = () => {
         anms.grids.top,
         A,
         anms.grids.stroke,
-        gridScrollLarge.x,
+        gridScrollLarge.x
       );
 
       drawDataText(context, A, playhead, anms.text.fill);
@@ -237,7 +237,7 @@ function drawPulse(context, A, anms) {
     ['right', anms.pulse.size, [0, 0], -A],
     ['left', anms.pulse.size],
     ['left', anms.pulse.size, [0, 0], -A],
-  ].forEach(faceProps => {
+  ].forEach((faceProps) => {
     renderer.face(context, faceProps, anms.pulse.fill);
   });
 }
@@ -265,7 +265,7 @@ function drawGrid(context, resolution, y, amplitude, stroke, _translateX = 0) {
     }
   });
 
-  linspace(resolution).forEach(step => {
+  linspace(resolution).forEach((step) => {
     const a1 = [-amplitude, y, offset + step * amplitude];
     const b1 = [amplitude, y, offset + step * amplitude];
     renderer.line(context, a1, b1, stroke);
@@ -280,15 +280,20 @@ function drawIsolines(context, playhead, { y, size, offset }, opacity = 0.3) {
   context.lineWidth = 3;
   context.lineJoin = 'round';
 
-  isolines({ y, size, offset }, playhead, band => {
+  isolines({ y, size, offset }, playhead, (band) => {
     renderer.shape(context, band, `hsla(220, 100%, 50%, ${opacity})`);
     context.stroke();
   });
 
   renderer.shape(
     context,
-    [[-size, y, -size], [size, y, -size], [size, y, size], [-size, y, size]],
-    '#000',
+    [
+      [-size, y, -size],
+      [size, y, -size],
+      [size, y, size],
+      [-size, y, size],
+    ],
+    '#000'
   );
 }
 
@@ -304,11 +309,11 @@ function drawDataText(context, A, playhead, textColor) {
     location,
     'right',
     textColor,
-    '12px monospace',
+    '12px monospace'
   );
 
   const visible = Math.round(
-    mapRange(playhead, 0.2, 0.5, 0, output.length, true),
+    mapRange(playhead, 0.2, 0.5, 0, output.length, true)
   );
 
   output.slice(0, visible).forEach((text, idx) => {
@@ -318,7 +323,7 @@ function drawDataText(context, A, playhead, textColor) {
       [location[0], -A * (0.5 - 0.1 * idx), location[2]],
       'right',
       textColor,
-      '6px monospace',
+      '6px monospace'
     );
   });
 }
@@ -327,7 +332,7 @@ const range = 8;
 
 function drawScrollText(context, A, playhead, textColor) {
   const scroll = Math.round(
-    mapRange(playhead, 0.2, 1, 0, code.length / 8, true),
+    mapRange(playhead, 0.2, 1, 0, code.length / 8, true)
   );
   const start = scroll < range ? 0 : scroll - range;
 
@@ -338,7 +343,7 @@ function drawScrollText(context, A, playhead, textColor) {
       [-A * 0.8, -A * (0.3 - 0.1 * idx), A],
       'left',
       textColor,
-      '6px monospace',
+      '6px monospace'
     );
   });
 }

@@ -6,7 +6,7 @@ const { matrixMultiply } = require('./matrix');
 const { hueCycle } = require('./clrs');
 
 const settings = {
-  dimensions: [800, 600],
+  dimensions: [1600, 1600],
   animate: true,
   duration: 40,
   scaleToView: true,
@@ -61,8 +61,8 @@ const sketch = () => {
 
     attractor.push([x, y, z]);
 
-    const projected = attractor.map(vertex => {
-      const v = vertex.map(v => [v]);
+    const projected = attractor.map((vertex) => {
+      const v = vertex.map((v) => [v]);
       let rotated = matrixMultiply(rotationX, v);
       rotated = matrixMultiply(rotationY, rotated);
       rotated = matrixMultiply(rotationZ, rotated);
@@ -86,7 +86,7 @@ const sketch = () => {
     const color = hueCycle(hueStart, playhead);
 
     context.strokeStyle = color;
-    context.lineWidth = 8;
+    context.lineWidth = 16;
     context.lineCap = 'round';
     context.lineJoin = 'round';
 

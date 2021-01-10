@@ -6,7 +6,7 @@ const { matrixMultiply } = require('./matrix');
 const { hueCycle } = require('./clrs');
 
 const settings = {
-  dimensions: [800, 800],
+  dimensions: [1600, 1600],
   animate: true,
   duration: 4,
   scaleToView: true,
@@ -109,8 +109,8 @@ const sketch = () => {
 
     const distance = 2.25;
 
-    const projected = hyperCube.map(vertex => {
-      const v = vertex.map(v => [v]);
+    const projected = hyperCube.map((vertex) => {
+      const v = vertex.map((v) => [v]);
 
       // Rotate around planes
       let rotated4d = matrixMultiply(rotationXY, v);
@@ -136,7 +136,7 @@ const sketch = () => {
       ];
       const projected2d = matrixMultiply(projection2d, rotated3d);
 
-      return projected2d.map(v => (v * width) / 3);
+      return projected2d.map((v) => (v * width) / 3);
     });
 
     context.fillStyle = '#0D0308';
@@ -150,7 +150,7 @@ const sketch = () => {
 
     edges.forEach(([a, b]) => {
       line(context, projected[a], projected[b], {
-        lineWidth: 1,
+        lineWidth: 4,
         stroke: color,
       });
     });

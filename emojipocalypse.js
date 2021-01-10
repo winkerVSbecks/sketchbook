@@ -4,9 +4,9 @@ const Random = require('canvas-sketch-util/random');
 const { fun } = require('./emoji');
 
 const settings = {
-  dimensions: [800, 600],
+  dimensions: [1080, 1080],
   animate: true,
-  duration: 20,
+  duration: 10,
   scaleToView: true,
 };
 
@@ -25,8 +25,8 @@ const sketch = () => {
             [Random.rangeFloor(1, 3), Random.rangeFloor(1, 3)],
             [Random.range(0, 2 * Math.PI), Random.range(0, 2 * Math.PI)],
             Random.rangeFloor(2, 10),
-            Random.pick(fun),
-          ),
+            Random.pick(fun)
+          )
       );
     },
     render({ context, width, height, playhead, deltaTime }) {
@@ -36,7 +36,7 @@ const sketch = () => {
       context.clearRect(0, 0, width, height);
       context.fillRect(0, 0, width, height);
 
-      curves.forEach(curve => {
+      curves.forEach((curve) => {
         curve.update(angle);
         curve.drawEmoji(context, width * 0.0625);
       });
@@ -53,7 +53,7 @@ class Lissajous {
     vel = [1, 3],
     start = [-Math.PI / 2, -Math.PI / 2],
     length = 50,
-    emoji,
+    emoji
   ) {
     this.center = center;
     this.r = r;
@@ -65,7 +65,7 @@ class Lissajous {
   }
 
   update(angle) {
-    this.path = linspace(this.length).map(dt => [
+    this.path = linspace(this.length).map((dt) => [
       this.center[0] +
         this.r * Math.cos((angle + 0.2 * dt) * this.vel[0] - this.start[0]),
       this.center[1] +

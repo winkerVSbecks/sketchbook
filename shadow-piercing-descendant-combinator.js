@@ -7,7 +7,7 @@ const { drawShape } = require('./geometry');
 const { wordShuffler, letterShuffler } = require('./word-shuffler');
 
 const settings = {
-  dimensions: [800, 800],
+  dimensions: [1600, 1600],
   animate: true,
   duration: 7,
   scaleToView: true,
@@ -18,7 +18,7 @@ const settings = {
 const sketch = ({ context, width, height }) => {
   console.clear();
 
-  const fontSize = 18;
+  const fontSize = 18 * 3;
   const lineHeight = 1;
   context.font = `${fontSize}px monospace`;
 
@@ -32,11 +32,10 @@ const sketch = ({ context, width, height }) => {
                                       '
                                       '
                                       '
-                                      '
-                 >>>                  '
-                                      '
             Shadow-Piercing           '
          Descendant Combinator        '
+                                      '
+                                      '
                                       '
                                       '
                                       '
@@ -94,12 +93,12 @@ const sketch = ({ context, width, height }) => {
       const newChars = chars.map((c, idx) =>
         charTimes[idx].t <= 1.1
           ? letterShuffler(finalChars[idx], charTimes[idx].t, 0, 1)
-          : letterShuffler(' ', charTimes[idx].t, 1, 2),
+          : letterShuffler(' ', charTimes[idx].t, 1, 2)
       );
 
       const animatedLines = R.compose(
         R.map(R.join('')),
-        R.splitEvery(39),
+        R.splitEvery(39)
       )(newChars);
 
       animatedLines.forEach((line, idx) => {

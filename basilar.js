@@ -70,7 +70,7 @@ function drawVignette(context, width, height) {
     innerRadius,
     width / 2,
     height / 2,
-    outerRadius,
+    outerRadius
   );
   grd.addColorStop(1, 'rgba(0,0,0, 0.5)');
   grd.addColorStop(0.2, 'rgba(0,0,0,0)');
@@ -89,9 +89,9 @@ function drawScanLines(context, width, height, frame) {
       : 'rgba(255, 255, 255, 0.1)';
 
   linspace(height)
-    .map(v => v * height)
+    .map((v) => v * height)
     .filter((_, idx) => idx % 8 === 0)
-    .forEach(y => {
+    .forEach((y) => {
       context.lineWidth = 4;
       context.beginPath();
       context.moveTo(0, y);
@@ -119,7 +119,7 @@ class BasilarMembrane {
       (_, idx) =>
         Math.pow(pointCount - idx, pow) *
           ((baseFreq - apexFreq) / Math.pow(pointCount, pow)) +
-        apexFreq,
+        apexFreq
     );
   }
 
@@ -161,7 +161,7 @@ class BasilarMembrane {
       this.resOff = verticalOffset(
         idx,
         frequency,
-        this.basilarMembraneResonance,
+        this.basilarMembraneResonance
       );
 
       localPhase[idx] =
@@ -198,7 +198,7 @@ class BasilarMembrane {
     const path = this.basilarMembrane.slice(...spread);
     // context.moveTo(this.base.x, this.base.y);
     context.moveTo(path[0].x, path[0].y);
-    path.forEach(pt => {
+    path.forEach((pt) => {
       context.lineTo(pt.x, pt.y);
     });
     context.stroke();
@@ -242,7 +242,7 @@ function getPeak(
   tiedSteps,
   amplitude,
   base,
-  movementScale,
+  movementScale
 ) {
   const resOff = verticalOffset(x, freq, basilarMembraneResonance);
   let peak = resOff * amplitude * 1.0;
