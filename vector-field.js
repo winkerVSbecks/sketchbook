@@ -31,7 +31,7 @@ canvasSketch(() => {
     context.fillStyle = clrs.gray[0];
     context.fillRect(0, 0, width, height);
 
-    const gridSize = 7;
+    const gridSize = 32;
     const padding = width * 0.2;
     const tileSize = (width - padding * 2) / gridSize;
 
@@ -74,7 +74,7 @@ canvasSketch(() => {
           t.x - length / 2,
           t.y - thickness / 2,
           length,
-          thickness,
+          thickness
         );
         context.restore();
       }
