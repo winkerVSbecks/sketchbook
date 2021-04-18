@@ -3,10 +3,11 @@ const lerp = require('lerp');
 const SimplexNoise = require('simplex-noise');
 const chroma = require('chroma-js');
 const { mapRange, linspace } = require('canvas-sketch-util/math');
+const { clipPolylinesToBox } = require('canvas-sketch-util/geometry');
 const MarchingSquaresJS = require('marchingsquares');
 
 // 1234567890abcdefghijklmnopqrstuvwxyz
-const simplex = new SimplexNoise('storybook-js');
+const simplex = new SimplexNoise('noise');
 
 const settings = {
   animate: true,
@@ -19,15 +20,16 @@ const settings = {
 };
 
 const colourScale = chroma.scale().domain([0, 1]);
-const gridSize = [64, 48];
+const gridSize = [64 * 2, 48 * 2];
 
 canvasSketch(() => {
   return ({ context, width, height, playhead }) => {
     context.clearRect(0, 0, width, height);
-    context.fillStyle = '#2a0481';
+    // context.fillStyle = '#2a0481';
+    context.fillStyle = '#001';
     context.fillRect(0, 0, width, height);
 
-    const padding = 0; // height * 0.2;
+    const padding = height * 0.2;
     const tileSize = [
       (width - padding * 2) / gridSize[0],
       (height - padding * 2) / gridSize[1],
@@ -51,8 +53,8 @@ canvasSketch(() => {
         };
 
         const _n = simplex.noise3D(
-          x / (gridSize[0] * 0.5),
-          y / (gridSize[1] * 0.5),
+          x / (gridSize[0] * 1),
+          y / (gridSize[1] * 1),
           time
         );
 
@@ -60,9 +62,9 @@ canvasSketch(() => {
 
         data[y].push(n);
 
-        context.fillStyle = colourScale(n);
-        context.beginPath();
-        context.fillRect(t.x, t.y - length[1], length[0], length[1]);
+        // context.fillStyle = colourScale(n);
+        // context.beginPath();
+        // context.fillRect(t.x, t.y - length[1], length[0], length[1]);
       }
     }
 
@@ -73,6 +75,7 @@ canvasSketch(() => {
     gradient.addColorStop(0, 'rgb(86, 119, 254, 0.1)');
     gradient.addColorStop(1, 'rgb(255, 115, 0, 0.1)');
     context.strokeStyle = gradient;
+    context.strokeStyle = '#fff';
     context.lineWidth = 4;
 
     lines.forEach((line) => {
@@ -117,7 +120,14 @@ function drawIsoLines(noiseData, [sizeX, sizeY]) {
     }
   });
 
-  return lines;
+  const margin = sizeY * 0.04;
+
+  return clipPolylinesToBox(lines, [
+    margin,
+    margin,
+    sizeX - margin,
+    sizeY - margin,
+  ]);
 }
 
 function drawShape([start, ...pts]) {

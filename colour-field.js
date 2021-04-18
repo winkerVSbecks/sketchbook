@@ -12,8 +12,9 @@ const simplex = new SimplexNoise('81234n32478320');
 
 const settings = {
   animate: true,
-  duration: 8,
-  dimensions: [1600, 1600],
+  duration: 6,
+  // dimensions: [1600, 1600],
+  dimensions: [660, 320],
   scaleToView: true,
   // playbackRate: 'throttle',
   // fps: 24,
@@ -37,19 +38,19 @@ canvasSketch(() => {
     context.fillStyle = clrs.gray[0];
     context.fillRect(0, 0, width, height);
 
-    const gridSize = 30;
+    const gridSize = [30, 12];
     const padding = height * 0.15;
-    const tileSize = (height - padding * 2) / gridSize;
+    const tileSize = (width - padding * 2) / gridSize[0];
     const length = tileSize * 0.65;
-    const thickness = tileSize * 0.1;
+    const thickness = 2; //tileSize * 0.1;
     const time = Math.sin(playhead * 2 * Math.PI);
     z = z + 0.01;
 
-    for (let x = 0; x < gridSize; x++) {
-      for (let y = 0; y < gridSize; y++) {
+    for (let x = 0; x < gridSize[0]; x++) {
+      for (let y = 0; y < gridSize[1]; y++) {
         // get a 0..1 UV coordinate
-        const u = gridSize <= 1 ? 0.5 : x / (gridSize - 1);
-        const v = gridSize <= 1 ? 0.5 : y / (gridSize - 1);
+        const u = gridSize[0] <= 1 ? 0.5 : x / (gridSize[0] - 1);
+        const v = gridSize[1] <= 1 ? 0.5 : y / (gridSize[1] - 1);
 
         // scale to dimensions with a border padding
         const t = {
@@ -60,20 +61,20 @@ canvasSketch(() => {
         // Draw
         context.save();
         const clr = simplex.noise3D(
-          x / (gridSize * 2) + 10000,
-          y / (gridSize * 2) + 10000,
+          x / (gridSize[0] * 2) + 10000,
+          y / (gridSize[1] * 2) + 10000,
           time
         );
         context.fillStyle = colourScale(clr);
 
         const rotation =
-          simplex.noise3D(x / gridSize, y / gridSize, time) * Math.PI;
+          simplex.noise3D(x / gridSize[0], y / gridSize[1], time) * Math.PI;
         const l =
           length / 2 +
           (normalize(
             simplex.noise3D(
-              x / (gridSize * 2) + 10000,
-              y / (gridSize * 2) + 10000,
+              x / (gridSize[0] * 2) + 10000,
+              y / (gridSize[1] * 2) + 10000,
               time
             ),
             -1,
@@ -90,7 +91,7 @@ canvasSketch(() => {
         context.translate(-t.x, -t.y);
 
         // Draw the line
-        context.fillRect(t.x, t.y - thickness, l, thickness);
+        context.fillRect(t.x, t.y - thickness, length, thickness);
         context.restore();
       }
     }

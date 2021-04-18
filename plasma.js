@@ -13,7 +13,8 @@ const simplex = new SimplexNoise('1234567890abcdefghijklmnopqrstuvwxyz');
 const settings = {
   animate: true,
   duration: 8,
-  dimensions: [800, 800],
+  // dimensions: [800, 800],
+  dimensions: [660, 320],
   scaleToView: true,
   playbackRate: 'throttle',
   fps: 24,
@@ -33,17 +34,18 @@ canvasSketch(() => {
     context.fillStyle = '#001';
     context.fillRect(0, 0, width, height);
 
-    const gridSize = 48;
+    const gridSize = [32, 24];
     const padding = 0; // height * 0.2;
-    const tileSize = (height - padding * 2) / gridSize;
-    const length = tileSize * 1.1;
+    const tileSizeX = (width - padding * 2) / gridSize[0];
+    const tileSizeY = (height - padding * 2) / gridSize[1];
+    const length = [tileSizeX * 1.1, tileSizeY * 1.1];
     const time = Math.sin(playhead * 2 * Math.PI);
 
-    for (let x = 0; x < gridSize; x++) {
-      for (let y = 0; y < gridSize; y++) {
+    for (let x = 0; x < gridSize[0]; x++) {
+      for (let y = 0; y < gridSize[0]; y++) {
         // get a 0..1 UV coordinate
-        const u = gridSize <= 1 ? 0.5 : x / (gridSize - 1);
-        const v = gridSize <= 1 ? 0.5 : y / (gridSize - 1);
+        const u = gridSize[0] <= 1 ? 0.5 : x / (gridSize[0] - 1);
+        const v = gridSize[1] <= 1 ? 0.5 : y / (gridSize[1] - 1);
 
         // scale to dimensions with a border padding
         const t = {
@@ -51,14 +53,18 @@ canvasSketch(() => {
           y: lerp(padding, height - padding, v),
         };
 
-        const n = simplex.noise3D(x / (gridSize * 2), y / (gridSize * 2), time);
+        const n = simplex.noise3D(
+          x / (gridSize[0] * 2),
+          y / (gridSize[1] * 2),
+          time
+        );
 
         // Draw
         context.save();
         context.fillStyle = colourScale(n);
 
         context.beginPath();
-        context.fillRect(t.x, t.y - length, length, length);
+        context.fillRect(t.x, t.y - length[1], length[0], length[1]);
         context.restore();
       }
     }
