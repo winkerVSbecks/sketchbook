@@ -11,9 +11,10 @@ const simplex = new SimplexNoise('noise');
 
 const settings = {
   animate: true,
-  duration: 6,
+  duration: 4,
   // dimensions: [800, 400],
   dimensions: [660, 320],
+  // dimensions: [1062, 300],
   scaleToView: true,
   playbackRate: 'throttle',
   fps: 24,
@@ -53,9 +54,9 @@ canvasSketch(() => {
         };
 
         const _n = simplex.noise3D(
-          x / (gridSize[0] * 1),
-          y / (gridSize[1] * 1),
-          time
+          x / (gridSize[0] * 0.75),
+          y / (gridSize[1] * 0.75),
+          time * 0.5
         );
 
         const n = mapRange(_n, -1, 1, 0, 1);
@@ -75,7 +76,7 @@ canvasSketch(() => {
     gradient.addColorStop(0, 'rgb(86, 119, 254, 0.1)');
     gradient.addColorStop(1, 'rgb(255, 115, 0, 0.1)');
     context.strokeStyle = gradient;
-    context.strokeStyle = '#fff';
+    context.strokeStyle = '#f1f9fe';
     context.lineWidth = 4;
 
     lines.forEach((line) => {
