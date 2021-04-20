@@ -11,8 +11,9 @@ const simplex = new SimplexNoise();
 
 const settings = {
   animate: true,
-  duration: 6,
+  duration: 4,
   dimensions: [1080, 1080],
+  // dimensions: [800, 400],
   scaleToView: true,
   // playbackRate: 'throttle',
   // fps: 24,
@@ -25,7 +26,7 @@ canvasSketch(() => {
   return ({ context, width, height, playhead }) => {
     context.clearRect(0, 0, width, height);
     // context.fillStyle = '#2a0481';
-    context.fillStyle = '#001';
+    context.fillStyle = '#131217'; // '#001';
     context.fillRect(0, 0, width, height);
 
     const padding = height * 0.2;
@@ -33,15 +34,15 @@ canvasSketch(() => {
 
     const config = [
       {
-        time: Math.sin(playhead * Math.PI + Math.PI * off * 3),
+        time: Math.sin(playhead * Math.PI - Math.PI * off * 3),
         color: '#FF0000',
       },
       {
-        time: Math.sin(playhead * Math.PI + Math.PI * off * 2),
+        time: Math.sin(playhead * Math.PI - Math.PI * off * 2),
         color: '#00FF00',
       },
       {
-        time: Math.sin(playhead * Math.PI + Math.PI * off),
+        time: Math.sin(playhead * Math.PI - Math.PI * off),
         color: '#0000FF',
       },
       { time: Math.sin(playhead * Math.PI), color: '#fff' },
