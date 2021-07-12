@@ -12,7 +12,8 @@ const simplex = new SimplexNoise();
 const settings = {
   animate: true,
   duration: 4,
-  dimensions: [1080, 1080],
+  // dimensions: [1200, 630],
+  dimensions: [1920, 1080],
   // dimensions: [800, 400],
   scaleToView: true,
   // playbackRate: 'throttle',
@@ -58,7 +59,7 @@ canvasSketch(() => {
       lines: drawIsoLines(c.data, [width, height]),
     }));
 
-    context.lineWidth = 12;
+    context.lineWidth = 24;
 
     bands.forEach((l) => {
       drawLines(l.lines, l.color, context);

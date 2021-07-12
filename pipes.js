@@ -2,32 +2,39 @@ const canvasSketch = require('canvas-sketch');
 const Random = require('canvas-sketch-util/random');
 const { mapRange, linspace, clamp } = require('canvas-sketch-util/math');
 const { drawShape } = require('./geometry');
+const eases = require('eases');
 
 const settings = {
   animate: true,
   duration: 6,
-  dimensions: [800, 800],
+  dimensions: [800, 600],
   scaleToView: true,
 };
 
 const PALETTE = Random.shuffle([
-  '#fff',
-  '#fff791',
-  '#9aeeeb',
-  '#1a5ece',
-  '#6ee99d',
-  '#000',
-  '#faf8f4',
+  // '#fff',
+  // '#fff791',
+  // '#9aeeeb',
+  // // '#1a5ece',
+  // '#6ee99d',
+  // '#000',
+  // '#faf8f4',
+  // neony
+  '#FDC22D',
+  '#F992E2',
+  '#FB331C',
+  '#3624F4',
+  '#E7EEF6',
 ]);
-const GRID_SIZE = 16;
+const GRID_SIZE = 16 * 2;
 
 const sketch = async (app) => {
   const { canvas } = app;
 
   // Take a background color
-  const background = PALETTE.shift();
+  const background = '#0A1918'; // PALETTE.shift();
 
-  const pipes = linspace(24 + 6).map(() => ({
+  const pipes = linspace(24 * 8).map(() => ({
     pts: pipeOfLength(12), // [[1, 1], [3, 1], [3, 4], [6, 4], [6, 6], [8, 6], [10, 6], [10, 12]]
     color: Random.pick(PALETTE),
   }));
@@ -57,7 +64,9 @@ canvasSketch(sketch, settings);
 
 function drawPipeToScale(context, [width, height]) {
   return (_pts, color, bg, playhead) => {
-    const t = Math.sin(playhead * Math.PI);
+    const time = Math.sin(playhead * Math.PI);
+    const t = eases.quadInOut(time);
+
     const pts = _pts.map(uvToXy([width, height]));
 
     let l = 0;

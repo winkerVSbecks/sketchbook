@@ -40,7 +40,7 @@ const animation = anime({
   duration: settings.duration * 1000,
 });
 
-const sketch = async app => {
+const sketch = async (app) => {
   // Setup a reverb with ToneJS
   const reverb = new Tone.Reverb({
     decay: 4,
@@ -107,7 +107,7 @@ const sketch = async app => {
       context.fillRect(0, 0, width, height);
 
       // Play tones
-      tones.forEach(tone => {
+      tones.forEach((tone) => {
         if (metronome % tone === 0) {
           addNote();
         }
@@ -140,7 +140,7 @@ const sketch = async app => {
       notes[noteIndex],
       '16n',
       synth.context.currentTime,
-      velocity,
+      velocity
     );
   }
 };
@@ -206,17 +206,17 @@ function makePipe(length = 6) {
   ];
 
   return linspace(length).reduce(
-    polyline => {
+    (polyline) => {
       const dir = randomDir(prevDir);
       const a = polyline[polyline.length - 1];
 
-      const b = dir.map(v => v * Random.rangeFloor(1, 3));
+      const b = dir.map((v) => v * Random.rangeFloor(1, 3));
       prevDir = dir;
       return polyline.concat([
         [clampToGrid(b[0] + a[0]), clampToGrid(b[1] + a[1])],
       ]);
     },
-    [start],
+    [start]
   );
 }
 
@@ -232,11 +232,14 @@ function pipeLength(pts) {
 }
 
 function randomDir(prevDir) {
-  const prev = prevDir.map(v => v * -1);
+  const prev = prevDir.map((v) => v * -1);
   return Random.pick(
-    [[1, 0], [0, 1], [-1, 0], [0, -1]].filter(
-      dir => !(prev && dir[0] === prev[0] && dir[1] === prev[1]),
-    ),
+    [
+      [1, 0],
+      [0, 1],
+      [-1, 0],
+      [0, -1],
+    ].filter((dir) => !(prev && dir[0] === prev[0] && dir[1] === prev[1]))
   );
 }
 
