@@ -11,13 +11,11 @@ const simplex = new SimplexNoise('noise');
 
 const settings = {
   animate: true,
-  duration: 4,
-  // dimensions: [800, 400],
-  // dimensions: [660, 320],
+  duration: 6,
   dimensions: [1080, 1080],
   scaleToView: true,
   playbackRate: 'throttle',
-  fps: 24,
+  // fps: 24,
 };
 
 const colourScale = chroma.scale().domain([0, 1]);
@@ -27,15 +25,9 @@ canvasSketch(() => {
   return ({ context, width, height, playhead }) => {
     context.clearRect(0, 0, width, height);
     context.fillStyle = '#2a0481';
-    // context.fillStyle = '#001';
     context.fillRect(0, 0, width, height);
 
     const padding = height * 0.2;
-    const tileSize = [
-      (width - padding * 2) / gridSize[0],
-      (height - padding * 2) / gridSize[1],
-    ];
-    const length = [tileSize[0] * 1.1, tileSize[1] * 1.1];
     const time = Math.sin(playhead * Math.PI);
 
     let data = [];
@@ -62,10 +54,6 @@ canvasSketch(() => {
         const n = mapRange(_n, -1, 1, 0, 1);
 
         data[y].push(n);
-
-        // context.fillStyle = colourScale(n);
-        // context.beginPath();
-        // context.fillRect(t.x, t.y - length[1], length[0], length[1]);
       }
     }
 
@@ -76,8 +64,7 @@ canvasSketch(() => {
     gradient.addColorStop(0, 'rgb(86, 119, 254, 0.1)');
     gradient.addColorStop(1, 'rgb(255, 115, 0, 0.1)');
     context.strokeStyle = gradient;
-    // context.strokeStyle = '#f1f9fe';
-    context.lineWidth = 4;
+    context.lineWidth = 12;
 
     lines.forEach((line) => {
       const [start, ...pts] = line;
@@ -90,6 +77,25 @@ canvasSketch(() => {
 
       context.stroke();
     });
+
+    // Headline
+    const headlineFontSize = 120;
+    context.font = `800 ${headlineFontSize}px Nunito Sans`;
+    context.textAlign = 'center';
+    context.textBaseline = 'middle';
+    context.fillStyle = '#fff';
+    context.fillText('Storybook 6.3', width / 2, height / 2);
+
+    // Sub-title
+    context.font = `400 ${headlineFontSize / 2.5}px Nunito Sans`;
+    context.textAlign = 'center';
+    context.textBaseline = 'middle';
+    context.fillStyle = '#EEEEEE';
+    context.fillText(
+      'Optimized for UI development',
+      width / 2,
+      height / 2 + headlineFontSize * 0.8
+    );
   };
 }, settings);
 
