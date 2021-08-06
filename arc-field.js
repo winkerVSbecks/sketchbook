@@ -13,16 +13,13 @@ const simplex = new SimplexNoise('1234567890abcdefghijklmnopqrstuvwxyz');
 const settings = {
   animate: true,
   duration: 8,
-  dimensions: [800, 600],
+  dimensions: [800 * 2, 600 * 2],
   scaleToView: true,
   // playbackRate: 'throttle',
   // fps: 24,
 };
 
-const colourScale = chroma
-  .scale('Spectral')
-  .mode('lch')
-  .domain([-1, 1]);
+const colourScale = chroma.scale('Spectral').mode('lch').domain([-1, 1]);
 
 canvasSketch(() => {
   return ({ context, frame, width, height, playhead }) => {

@@ -6,13 +6,13 @@ const simplex = new SimplexNoise();
 const settings = {
   animate: true,
   duration: 8,
-  dimensions: [800, 800],
+  dimensions: [1080, 1080],
   scaleToView: true,
 };
 
 // const glyphs = ['↑', '↗', '→', '↘', '↓', '↙', '←', '↖', '✳'];
-// const glyphs = ['◧', '◨', '◩', '◪', '■', '□', '⬒', '⬓', '⬕'];
-const glyphs = ['¤', '✳', '●', '◔', '○', '◕', '◐', '◑', '◒'];
+const glyphs = ['◧', '◨', '◩', '◪', '■', '□', '⬒', '⬓', '⬕'];
+// const glyphs = ['¤', '✳', '●', '◔', '○', '◕', '◐', '◑', '◒'];
 
 canvasSketch(() => {
   const gridSize = 24;
@@ -42,7 +42,7 @@ canvasSketch(() => {
         ];
 
         // Visualize the grid
-        context.font = `400 ${tileSize * 0.75}px 'monospace'`;
+        context.font = `400 ${tileSize * 0.6}px 'monospace'`;
         context.textAlign = 'center';
         context.textBaseline = 'middle';
         context.fillStyle = '#fff';
