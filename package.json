@@ -57,6 +57,7 @@
     "reline": "^1.0.0-beta.3",
     "riso-colors": "^1.0.1",
     "simplex-noise": "^2.4.0",
+    "stackblur": "^1.0.0",
     "styled-components": "^3.4.2",
     "tone": "^13.4.9",
     "touches": "^1.2.2",

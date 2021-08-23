@@ -38,7 +38,7 @@ const config = {
   trailSize: { min: 5, max: 15 },
   drawHead: false,
   distortion: Math.PI / 16,
-  debugCenter: true,
+  debugCenter: false,
 };
 
 const sketch = ({ width, height }) => {
