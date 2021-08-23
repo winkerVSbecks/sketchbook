@@ -25,21 +25,31 @@ const settings = {
 //   '#203359',
 // ];
 
-const BG = '#00010D';
+// const BG = '#00010D';
+// const colors = [
+//   '#1B0A59',
+//   '#1A0D73',
+//   '#100F40',
+//   '#0B0D26',
+//   '#141DD9',
+//   '#141BA6',
+//   '#1B3DA6',
+//   '#99AABF',
+//   '#637AA6',
+//   '#3F59A6',
+// ];
+
+const BG = '#000023';
 const colors = [
+  '#EB4B67',
+  '#F5C2CB',
+  '#ED6D52',
   '#1B0A59',
   '#1A0D73',
   '#100F40',
-  '#0B0D26',
-  '#141DD9',
-  '#141BA6',
-  '#1B3DA6',
-  '#99AABF',
-  '#637AA6',
-  '#3F59A6',
 ];
 
-const COUNT = 800;
+const COUNT = 800 * 40;
 const SPHERE_SIZE = 50;
 
 const sketch = () => {
@@ -117,7 +127,7 @@ function createAttractor(idx) {
     // shape
     path: [],
     // width: Random.rangeFloor(16, 48),
-    width: 16,
+    width: 2,
   };
 }
 
