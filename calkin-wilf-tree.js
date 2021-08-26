@@ -2,15 +2,15 @@ const canvasSketch = require('canvas-sketch');
 const chroma = require('chroma-js');
 const { randomNumber, range } = require('./math');
 
-const DEPTH = 6;
+const DEPTH = 10;
 
 const settings = {
   animate: true,
   duration: DEPTH + 2,
-  dimensions: [800, 600],
+  dimensions: [800 * 2, 600 * 2],
   scaleToView: true,
-  playbackRate: 'throttle',
-  fps: 24,
+  // playbackRate: 'throttle',
+  // fps: 24,
 };
 
 let steps, drawn, clrs;
@@ -18,7 +18,10 @@ let steps, drawn, clrs;
 // Each vertex a/b has two children:
 // (a+b)/b and a/(a+b)
 function fractions([a, b]) {
-  return [[a, a + b], [a + b, b]];
+  return [
+    [a, a + b],
+    [a + b, b],
+  ];
 }
 
 function drawCalkinWilf(context) {
@@ -73,8 +76,8 @@ canvasSketch(() => {
 
       steps[activeStep] && drawn.push(steps[activeStep]);
 
-      drawn.forEach(step => {
-        step.forEach(node => {
+      drawn.forEach((step) => {
+        step.forEach((node) => {
           node();
         });
       });
@@ -84,7 +87,7 @@ canvasSketch(() => {
       drawn = [];
       steps = range(DEPTH + 1).reduce(
         (acc, idx) => ({ ...acc, [idx]: [] }),
-        {},
+        {}
       );
 
       drawCalkinWilf(context)(
@@ -93,7 +96,7 @@ canvasSketch(() => {
         'HORIZONTAL',
         [width / 2, height / 2],
         [36, 1],
-        0,
+        0
       );
     },
   };

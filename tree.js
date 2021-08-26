@@ -1,3 +1,5 @@
+import { mapRange } from 'canvas-sketch-util/math';
+
 const canvasSketch = require('canvas-sketch');
 const ln = require('@lnjs/core');
 
@@ -60,9 +62,21 @@ const sketch = () => {
     );
 
     context.lineWidth = 4;
-    context.strokeStyle = 'white';
+    const clrs = [
+      '#8618F6',
+      '#0800F5',
+      '#49A1F8',
+      '#75FBF8',
+      '#75FB5A',
+      '#EAFE53',
+      '#F7CC45',
+      '#EB4025',
+    ];
+    // context.strokeStyle = 'white';
+    context.strokeStyle =
+      clrs[Math.floor(mapRange(playhead, 0, 1, 0, clrs.length))];
 
-    paths.forEach((path) => {
+    paths.forEach((path, idx) => {
       drawPath(context, path);
       context.stroke();
     });

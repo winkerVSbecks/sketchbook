@@ -3,12 +3,30 @@ const { linspace, mapRange } = require('canvas-sketch-util/math');
 const Random = require('canvas-sketch-util/random');
 const { pastel, ellsworthKelly } = require('./clrs');
 const { point, drawShape } = require('./geometry');
+const stackblur = require('stackblur');
 
 const settings = {
   dimensions: [800, 600],
   animate: true,
   duration: 10,
-  scaleToView: true,
+  // scaleToView: true,
+};
+
+const clrs = {
+  // bg: '#0A1918',
+  // paths: ['#FDC22D', '#F992E2', '#E7EEF6', '#FB331C', '#3624F4'],
+  bg: '#000000',
+  paths: [
+    /* '#2132FF', '#66DD42', '#FF4C0E', */ '#DF30F7',
+    '#8618F6',
+    '#0800F5',
+    '#49A1F8',
+    '#75FBF8',
+    '#75FB5A',
+    '#EAFE53',
+    '#F7CC45',
+    '#EB4025',
+  ],
 };
 
 const sketch = () => {
@@ -26,20 +44,27 @@ const sketch = () => {
             [Random.rangeFloor(1, 10), Random.rangeFloor(1, 10)],
             [Random.range(0, 2 * Math.PI), Random.range(0, 2 * Math.PI)],
             Random.rangeFloor(2, 10),
-            Random.pick(pastel),
-          ),
+            Random.pick(clrs.paths)
+          )
       );
     },
     render({ context, width, height, playhead, deltaTime }) {
       const angle = mapRange(playhead, 0, 1, 0, Math.PI * 2);
 
-      context.fillStyle = '#fff';
+      context.fillStyle = clrs.bg;
       context.clearRect(0, 0, width, height);
       context.fillRect(0, 0, width, height);
 
-      curves.forEach(curve => {
+      curves.forEach((curve, idx) => {
         curve.update(angle);
-        curve.drawPath(context, width * 0.0625);
+        if (idx === 12) {
+          curve.drawPath(context, width * 0.0625 * 2);
+          const imageData = context.getImageData(0, 0, width, height);
+          stackblur(imageData.data, width, height, 12);
+          context.putImageData(imageData, 0, 0);
+        } else {
+          curve.drawPath(context, width * 0.0625);
+        }
       });
     },
   };
@@ -54,7 +79,7 @@ class Lissajous {
     vel = [1, 3],
     start = [-Math.PI / 2, -Math.PI / 2],
     length = 50,
-    color = '#fff',
+    color = '#fff'
   ) {
     this.center = center;
     this.r = r;
@@ -66,7 +91,7 @@ class Lissajous {
   }
 
   update(angle) {
-    this.path = linspace(this.length).map(dt => [
+    this.path = linspace(this.length).map((dt) => [
       this.center[0] +
         this.r * Math.cos((angle + 0.2 * dt) * this.vel[0] - this.start[0]),
       this.center[1] +
@@ -77,7 +102,7 @@ class Lissajous {
   drawPath(context, s = 40) {
     const delta = Math.hypot(
       Math.abs(this.path[0][0] - this.path[this.path.length - 1][0]),
-      Math.abs(this.path[0][1] - this.path[this.path.length - 1][1]),
+      Math.abs(this.path[0][1] - this.path[this.path.length - 1][1])
     );
     // Scale width based on length
     context.lineWidth = mapRange(delta, 0, this.r, 1.25 * s, 0.5 * s, true);

@@ -49,7 +49,7 @@ const sketch = () => {
       context.fillRect(0, 0, width, height);
       context.translate(width / 2, height / 2);
 
-      pendulums.forEach(pendulum => {
+      pendulums.forEach((pendulum) => {
         // Draw Trails
         makeTrail(pendulum);
         drawTrail(context, pendulum);
@@ -134,7 +134,7 @@ function makeTrail(pendulum) {
 }
 
 function drawTrail(context, pendulum) {
-  context.lineWidth = 6;
+  context.lineWidth = 12;
   context.lineCap = 'round';
   // Motion path of top rod
   context.strokeStyle = pendulum.colors[0];

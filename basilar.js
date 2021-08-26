@@ -1,12 +1,13 @@
 const canvasSketch = require('canvas-sketch');
 const { linspace } = require('canvas-sketch-util/math');
 const Random = require('canvas-sketch-util/random');
+const stackblur = require('stackblur');
 
 const settings = {
   animate: true,
   duration: 4,
   dimensions: [800, 600],
-  scaleToView: true,
+  // scaleToView: true,
 };
 
 const pointCount = 1000;
@@ -55,8 +56,15 @@ canvasSketch(() => {
       basilar.update(deltaTime, playhead);
       basilar.draw(context);
 
-      // drawScanLines(context, width, height, frame);
-      // drawVignette(context, width, height);
+      drawScanLines(context, width, height, frame);
+      drawVignette(context, width, height);
+
+      // Apply blur
+      const imageData = context.getImageData(0, 0, width, height);
+      stackblur(imageData.data, width, height, 6);
+      context.putImageData(imageData, 0, 0);
+
+      drawScanLines(context, width, height, frame);
     },
   };
 }, settings);
@@ -128,9 +136,8 @@ class BasilarMembrane {
     this.basilarMembrane[pointCount - 1] = this.apex;
 
     // Determine the wavelength that is convert frequency to wavelength
-    const minFreq = this.basilarMembraneResonance[
-      this.basilarMembraneResonance.length - 1
-    ];
+    const minFreq =
+      this.basilarMembraneResonance[this.basilarMembraneResonance.length - 1];
     const maxFreq = this.basilarMembraneResonance[0];
 
     // check the min vs max
