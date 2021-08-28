@@ -12,20 +12,29 @@ const settings = {
   // scaleToView: true,
 };
 
+// https://fonts.google.com/specimen/Monoton?category=Display&preview.text=Space%20Worms&preview.text_type=custom
+// https://fonts.google.com/specimen/Bebas+Neue?category=Display&preview.text=Space%20Worms&preview.text_type=custom&sort=popularity#standard-styles
+// https://fonts.google.com/specimen/Righteous?category=Display&preview.text=Space%20Worms&preview.text_type=custom&sort=popularity
+
 const clrs = {
   // bg: '#0A1918',
   // paths: ['#FDC22D', '#F992E2', '#E7EEF6', '#FB331C', '#3624F4'],
-  bg: '#000000',
+  bg: '#1B1812',
   paths: [
-    /* '#2132FF', '#66DD42', '#FF4C0E', */ '#DF30F7',
-    '#8618F6',
-    '#0800F5',
-    '#49A1F8',
-    '#75FBF8',
-    '#75FB5A',
-    '#EAFE53',
-    '#F7CC45',
-    '#EB4025',
+    '#F2AFFA',
+    '#EE7E6C',
+    '#EEBABC',
+    '#FAECEB',
+    '#9FCDDE',
+    '#54A9BD',
+    // '#8618F6',
+    // '#0800F5',
+    // '#49A1F8',
+    // '#75FBF8',
+    // '#75FB5A',
+    // '#EAFE53',
+    // '#F7CC45',
+    // '#EB4025',
   ],
 };
 
@@ -38,14 +47,14 @@ const sketch = () => {
     begin({ context, width, height }) {
       curves = linspace(8).map(
         (_, idx) =>
-          new Lissajous(
-            [width / 2, height / 2],
-            width * 0.2,
-            [Random.rangeFloor(1, 10), Random.rangeFloor(1, 10)],
-            [Random.range(0, 2 * Math.PI), Random.range(0, 2 * Math.PI)],
-            Random.rangeFloor(2, 10),
-            Random.pick(clrs.paths)
-          )
+          new Lissajous({
+            center: [width / 2, height * 0.75],
+            r: width * 0.2,
+            vel: [Random.rangeFloor(1, 10), Random.rangeFloor(1, 10)],
+            start: [Random.range(0, 2 * Math.PI), Random.range(0, 2 * Math.PI)],
+            length: Random.rangeFloor(2, 10),
+            color: Random.pick(clrs.paths),
+          })
       );
     },
     render({ context, width, height, playhead, deltaTime }) {
@@ -57,10 +66,10 @@ const sketch = () => {
 
       curves.forEach((curve, idx) => {
         curve.update(angle);
-        if (idx === 12) {
+        if (idx === 0) {
           curve.drawPath(context, width * 0.0625 * 2);
           const imageData = context.getImageData(0, 0, width, height);
-          stackblur(imageData.data, width, height, 12);
+          stackblur(imageData.data, width, height, 6);
           context.putImageData(imageData, 0, 0);
         } else {
           curve.drawPath(context, width * 0.0625);
@@ -73,14 +82,14 @@ const sketch = () => {
 canvasSketch(sketch, settings);
 
 class Lissajous {
-  constructor(
+  constructor({
     center,
     r,
     vel = [1, 3],
     start = [-Math.PI / 2, -Math.PI / 2],
     length = 50,
-    color = '#fff'
-  ) {
+    color = '#fff',
+  }) {
     this.center = center;
     this.r = r;
     this.vel = vel;
