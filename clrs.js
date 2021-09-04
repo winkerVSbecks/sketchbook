@@ -12,7 +12,10 @@ function fillHsluv(h, s, l) {
 }
 
 function spectrum() {
-  return [0, 1, 2, 3, 4, 5].map((i) => fillHsluv(i * 25, 100, 50));
+  return [
+    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
+  ].map((i) => fillHsluv(i * 25, 100, 50));
+  // return [0, 1, 2, 3, 4, 5].map((i) => fillHsluv(i * 25, 100, 50));
 }
 
 function hueCycle(hueStart, t, sat = 0.75, light = 0.5) {
