@@ -7,7 +7,7 @@ const Bezier = require('bezier-js');
 const settings = {
   dimensions: [1080, 1080],
   animate: true,
-  duration: 6,
+  duration: 7,
   fps: 60,
 };
 
@@ -15,7 +15,7 @@ const config = {
   debug: false,
   step: 0.04,
   curve: {
-    steps: 40,
+    steps: 30,
     tightness: 0.5,
   },
   spring: {
@@ -29,24 +29,19 @@ const clrs = {
   fills: ['#f13401', '#0769ce', '#f1d93c', '#11804b'],
 };
 
-const sketch = () => {
+const sketch = ({ width, height }) => {
   // Random.setSeed('curve-relief');
 
-  let engine;
-  let world;
-  let runner;
-  let curves;
+  let engine, world, curves;
 
   return {
     begin({ canvas, width, height }) {
       engine = Matter.Engine.create();
       world = engine.world;
       runner = Matter.Runner.create();
-
       curves = clrs.fills
         .map((color) => springyCurve(world, { width, height }, color))
-        .sort((c1, c2) => c2.y - c1.y);
-
+        .sort((c1, c2) => c2.dist - c1.dist);
       if (config.debug) {
         const render = Matter.Render.create({
           canvas,
@@ -59,8 +54,6 @@ const sketch = () => {
 
         Matter.Render.run(render);
       }
-
-      // Matter.Runner.run(runner, engine);
     },
     render({ context, width, height, playhead, deltaTime }) {
       if (!config.debug) {
@@ -88,15 +81,13 @@ function springyCurve(world, { width, height }, color) {
   const bodies = [];
   const constraints = [];
 
-  const ends = [
-    { x: 0, y: 0 },
-    { x: width, y: 0 },
-  ];
-
   const points = [
-    ends[0],
-    { x: Random.range(0, width), y: Random.range(0, height) },
-    ends[1],
+    { x: width, y: 0 },
+    {
+      x: Random.range(width * 0.4, width * 0.6),
+      y: Random.range(height * 0.4, height * 0.6),
+    },
+    { x: 0, y: height },
   ];
 
   const curve = Bezier.quadraticFromPoints(
@@ -124,15 +115,22 @@ function springyCurve(world, { width, height }, color) {
   });
 
   const constraintEnd1 = Matter.Constraint.create({
-    pointA: ends[0],
+    pointA: points[0],
     bodyB: bodies[0],
     ...config.spring,
   });
 
   const constraintEnd2 = Matter.Constraint.create({
-    pointA: ends[1],
+    pointA: points[2],
     bodyB: bodies[bodies.length - 1],
     ...config.spring,
+  });
+
+  const constraintOrigin = Matter.Constraint.create({
+    pointA: { x: 0, y: 0 },
+    bodyB: bodies[bodies.length - 1],
+    stiffness: 1,
+    damping: 1,
   });
 
   Matter.Composite.add(world, [
@@ -140,9 +138,15 @@ function springyCurve(world, { width, height }, color) {
     ...constraints,
     constraintEnd1,
     constraintEnd2,
+    constraintOrigin,
   ]);
 
-  return { bodies, constraints, color, y: points[1].y };
+  return {
+    bodies,
+    constraints,
+    color,
+    dist: Math.hypot(points[1].x, points[1].y),
+  };
 }
 
 function drawCurve(context, { color, bodies }) {
@@ -164,6 +168,7 @@ function drawCurve(context, { color, bodies }) {
       bodyB.position.y
     );
   }
+  context.lineTo(0, 0);
   context.closePath();
   context.fill();
 }
