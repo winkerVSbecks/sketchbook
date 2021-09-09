@@ -3,6 +3,7 @@ const { lerpArray } = require('canvas-sketch-util/math');
 const Random = require('canvas-sketch-util/random');
 const Matter = require('matter-js');
 const Bezier = require('bezier-js');
+const { Lch } = require('./clrs');
 
 const settings = {
   dimensions: [1080, 1080],
@@ -24,13 +25,22 @@ const config = {
   },
 };
 
+// const clrs = {
+//   bg: '#fff',
+//   fills: ['#f13401', '#0769ce', '#f1d93c', '#11804b'],
+// };
 const clrs = {
-  bg: '#fff',
-  fills: ['#f13401', '#0769ce', '#f1d93c', '#11804b'],
+  fills: [
+    Lch(50, 50, Random.range(180, 360)),
+    Lch(100, 70, Random.range(0, 180)),
+    Lch(100, 20, Random.range(0, 180)),
+    Lch(20, 90, Random.range(0, 180)),
+  ],
+  bg: Lch(95, 0, 0),
 };
 
 const sketch = ({ width, height }) => {
-  // Random.setSeed('curve-relief');
+  Random.setSeed('curve-relief');
 
   let engine, world, curves;
 
@@ -145,15 +155,17 @@ function springyCurve(world, { width, height }, color) {
     bodies,
     constraints,
     color,
+    points,
     dist: Math.hypot(points[1].x, points[1].y),
   };
 }
 
-function drawCurve(context, { color, bodies }) {
+function drawCurve(context, { color, points, bodies }) {
   context.lineJoin = 'round';
   context.lineCap = 'round';
   context.fillStyle = color;
   context.beginPath();
+  context.moveTo(points[0].x, points[0].y);
   for (let idx = 1; idx < bodies.length; idx++) {
     const bodyA = bodies[idx - 1];
     const bodyB = bodies[idx];
