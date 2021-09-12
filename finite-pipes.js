@@ -2,7 +2,6 @@ const canvasSketch = require('canvas-sketch');
 const Random = require('canvas-sketch-util/random');
 const { mapRange } = require('canvas-sketch-util/math');
 const eases = require('eases');
-const clrsThing = require('./clrs').clrs();
 
 const settings = {
   dimensions: [1080, 1080],
@@ -11,40 +10,143 @@ const settings = {
   scaleToView: true,
 };
 
+// const clrs = {
+//   even: {
+//     outline: '#2C4BFF',
+//     fill: '#FF5885',
+//     bg: '#012483',
+//   },
+//   odd: {
+//     outline: '#FF0D6C',
+//     fill: '#FE664C',
+//     bg: '#FFD06E',
+//   },
+//   bg: '#FFDBE7',
+// };
+
+// const clrs = {
+//   even: {
+//     outline: '#3E4CCC',
+//     fill: '#EC6249',
+//     bg: '#EBECE5',
+//   },
+//   odd: {
+//     outline: '#3E4CCC',
+//     fill: '#EBECE5',
+//     bg: '#EC6249',
+//   },
+//   bg: '#0F0E2C',
+// };
+
+// const clrs = {
+//   even: {
+//     outline: '#2D2EBE',
+//     fill: '#FFFFFF',
+//     bg: '#487DE6',
+//   },
+//   odd: {
+//     outline: '#ED9F38',
+//     fill: '#DD7761',
+//     bg: '#E6BF45',
+//   },
+//   bg: '#C9DDF1',
+// };
+
+// const clrs = {
+//   even: {
+//     outline: '#091e25',
+//     fill: '#1cadfe',
+//     bg: '#33d682',
+//   },
+//   odd: {
+//     outline: '#091e25',
+//     fill: '#ff6871',
+//     bg: '#ffe15e',
+//   },
+//   bg: '#19e0ff',
+// };
+
+// const clrs = {
+//   even: {
+//     outline: '#FCA7FF',
+//     fill: '#FF79E2',
+//     bg: '#FDE3BF',
+//   },
+//   odd: {
+//     outline: '#17B9B9',
+//     fill: '#53F8C6',
+//     bg: '#EAFCFF',
+//   },
+//   bg: '#FFFFFF',
+// };
+
 const clrs = {
-  outline: clrsThing.ink(),
-  fills: [
-    clrsThing.ink(),
-    clrsThing.ink(),
-    clrsThing.ink(),
-    clrsThing.ink(),
-    clrsThing.ink(),
-    clrsThing.ink(),
-    clrsThing.ink(),
-    clrsThing.ink(),
+  stuff: [
+    {
+      outline: '#3624F4',
+      fill: '#3624F4',
+      bg: '#0A1918',
+    },
+    {
+      outline: '#FDC22D',
+      fill: '#FDC22D',
+      bg: '#0A1918',
+    },
+    {
+      outline: '#FB331C',
+      fill: '#FB331C',
+      bg: '#0A1918',
+    },
+    {
+      outline: '#F992E2',
+      fill: '#F992E2',
+      bg: '#0A1918',
+    },
+    {
+      outline: '#E7EEF6',
+      fill: '#E7EEF6',
+      bg: '#0A1918',
+    },
   ],
-  bg: clrsThing.bg,
+  even: {
+    outline: '#3624F4',
+    fill: '#3624F4',
+    bg: '#0A1918',
+  },
+  odd: {
+    outline: '#FDC22D',
+    fill: '#FDC22D',
+    bg: '#0A1918',
+  },
+  bg: '#0A1918',
 };
 
 const config = {
-  pipeCount: 5,
+  pipeCount: 9,
   lineWidth: 12,
   margin: 30,
+  r: 0.0625 / 2,
+  h: 0.3,
   exp: 0.25,
+  symmetric: false,
 };
 
 const sketch = async ({ width, height }) => {
-  const r = width * 0.0625;
-  const h = height * 0.25;
+  const r = width * config.r;
+  const h = height * config.h;
 
-  const pipes = new Array(config.pipeCount).fill().map((_, index) =>
-    createPipe({
+  const pipes = new Array(config.pipeCount).fill().map((_, index) => {
+    const colors = Random.pick(clrs.stuff);
+
+    return createPipe({
       r,
       h,
       index,
-      color: Random.pick(clrs.fills),
-    })
-  );
+      outline: colors.outline, //index % 2 === 0 ? clrs.even.outline : clrs.odd.outline,
+      fill: colors.fill, //index % 2 === 0 ? clrs.even.fill : clrs.odd.fill,
+      bg: colors.bg, //index % 2 === 0 ? clrs.even.bg : clrs.odd.bg,
+    });
+  });
 
   return {
     render({ context, width, height, playhead, time }) {
@@ -68,15 +170,16 @@ const sketch = async ({ width, height }) => {
   };
 };
 
-function createPipe({ r, h, index, color, direction }) {
+function createPipe({ r, h, index, outline, fill, bg }) {
   return {
     x: index * (2 * r + config.margin),
     r,
     h,
-    exp: Random.range(0.25, 0.75) * h,
-    color,
-    direction,
+    exp: (config.symmetric ? 0.25 : Random.range(0.25, 0.75)) * h,
     direction: Random.sign(),
+    outline,
+    fill,
+    bg,
   };
 }
 
@@ -85,7 +188,6 @@ function drawPipe(context, pipe, playhead, t, { targets, targetIndex }) {
   context.lineCap = 'round';
 
   const [inner, outer] = animations[targets[targetIndex]](pipe, t);
-  // const [inner, outer] = animations.expandInner(pipe, t);
 
   drawOutside(context, { ...pipe, ...outer });
   drawInside(context, { ...pipe, ...inner });
@@ -93,12 +195,12 @@ function drawPipe(context, pipe, playhead, t, { targets, targetIndex }) {
 
 function drawInside(
   context,
-  { x, r: rOriginal, h, exp, offset, direction, color }
+  { x, r: rOriginal, h, exp, offset, direction, fill }
 ) {
-  const r = Math.max(rOriginal - config.lineWidth, 0);
+  const r = Math.max(rOriginal - config.lineWidth * 1.5, 0);
   const y = offset || direction * (h - exp);
 
-  context.fillStyle = color;
+  context.fillStyle = fill;
   context.beginPath();
   context.moveTo(x - r, y);
   context.lineTo(x - r, y - exp);
@@ -109,11 +211,11 @@ function drawInside(
   context.fill();
 }
 
-function drawOutside(context, { x, r, h, exp, direction }) {
+function drawOutside(context, { x, r, h, exp, direction, outline, bg }) {
   const y = direction * (h - exp);
 
   context.lineWidth = r < config.lineWidth * 0.25 ? 0 : config.lineWidth;
-  context.strokeStyle = clrs.outline;
+  context.strokeStyle = outline;
   context.beginPath();
   context.moveTo(x - r, y);
   context.lineTo(x - r, y - exp);
@@ -121,6 +223,9 @@ function drawOutside(context, { x, r, h, exp, direction }) {
   context.lineTo(x + r, y + exp);
   context.arc(x, y + exp, r, 0, Math.PI);
   context.lineTo(x - r, y);
+
+  context.fillStyle = bg;
+  context.fill();
   context.stroke();
 }
 
@@ -159,7 +264,7 @@ const animations = {
         r,
         exp: mapRange(
           offset,
-          direction * exp + direction * r,
+          direction * exp,
           -1 * direction * h,
           exp,
           h,
