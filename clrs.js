@@ -89,6 +89,23 @@ const bilbao = [
   '#CD202F',
 ];
 
+// https://schema.figma.com/
+const figma = [
+  '#201c1d',
+  '#5f6ce0',
+  '#ffad72',
+  '#bafc9d',
+  '#bf8dff',
+  '#2a1f38',
+  '#ffb06b',
+  '#382718',
+  '#fc9de7',
+  '#382333',
+  '#d4ffff',
+  '#ffffff',
+  '#fff3d4',
+];
+
 function clrs(minContrast = 3) {
   const background = Random.pick(paperColors);
 

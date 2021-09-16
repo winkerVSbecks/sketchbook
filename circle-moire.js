@@ -1,6 +1,4 @@
 const canvasSketch = require('canvas-sketch');
-const { mapRange } = require('canvas-sketch-util/math');
-const Random = require('canvas-sketch-util/random');
 
 const settings = {
   dimensions: [1080, 1080],
@@ -89,39 +87,3 @@ function createPattern(context, x, offset) {
 
   return context.createPattern(patternCanvas, 'repeat');
 }
-
-{
-  /* <pattern id="pattern1" x="90" width="10" height="200" patternUnits="userSpaceOnUse">
-  <rect x="0" y="0" width="5" height="200" fill="#357EDD" />
-  <rect x="5" y="0" width="5" height="200" fill="white" />
-  <rect x="10" y="0" width="5" height="200" fill="#357EDD" />
-  <rect x="15" y="0" width="5" height="200" fill="white" />
-</pattern>
-<pattern id="pattern2" x="95" width="10" height="200" patternUnits="userSpaceOnUse">
-  <rect x="0" y="0" width="5" height="200" fill="#357EDD" />
-  <rect x="5" y="0" width="5" height="200" fill="white" />
-  <rect x="10" y="0" width="5" height="200" fill="#357EDD" />
-  <rect x="15" y="0" width="5" height="200" fill="white" />
-</pattern> */
-}
-
-// // Create a pattern, offscreen
-// const patternCanvas = document.createElement('canvas');
-// const patternContext = patternCanvas.getContext('2d');
-
-// // Give the pattern a width and height of 50
-// patternCanvas.width = 50;
-// patternCanvas.height = 50;
-
-// // Give the pattern a background color and draw an arc
-// patternContext.fillStyle = '#fec';
-// patternContext.fillRect(0, 0, patternCanvas.width, patternCanvas.height);
-// patternContext.arc(0, 0, 50, 0, .5 * Math.PI);
-// patternContext.stroke();
-
-// // Create our primary canvas and fill it with the pattern
-// const canvas = document.createElement('canvas');
-// const ctx = canvas.getContext('2d');
-// const pattern = ctx.createPattern(patternCanvas, 'repeat');
-// ctx.fillStyle = pattern;
-// ctx.fillRect(0, 0, canvas.width, canvas.height);
