@@ -1,25 +1,21 @@
 const canvasSketch = require('canvas-sketch');
 const Random = require('canvas-sketch-util/random');
-const { mapRange, linspace, clamp } = require('canvas-sketch-util/math');
+const {
+  mapRange,
+  linspace,
+  clamp,
+  lerpFrames,
+} = require('canvas-sketch-util/math');
 const { drawShape } = require('./geometry');
 const eases = require('eases');
 
 const settings = {
   animate: true,
   duration: 6,
-  dimensions: [800, 600],
-  scaleToView: true,
+  dimensions: [1080, 1080],
 };
 
 const PALETTE = Random.shuffle([
-  // '#fff',
-  // '#fff791',
-  // '#9aeeeb',
-  // // '#1a5ece',
-  // '#6ee99d',
-  // '#000',
-  // '#faf8f4',
-  // neony
   '#FDC22D',
   '#F992E2',
   '#FB331C',
@@ -29,13 +25,11 @@ const PALETTE = Random.shuffle([
 const GRID_SIZE = 16 * 2;
 
 const sketch = async (app) => {
-  const { canvas } = app;
-
   // Take a background color
-  const background = '#0A1918'; // PALETTE.shift();
+  const background = '#000'; // PALETTE.shift();
 
-  const pipes = linspace(24 * 8).map(() => ({
-    pts: pipeOfLength(12), // [[1, 1], [3, 1], [3, 4], [6, 4], [6, 6], [8, 6], [10, 6], [10, 12]]
+  const pipes = linspace(24 * 16).map(() => ({
+    pts: pipeOfLength(12),
     color: Random.pick(PALETTE),
   }));
 
@@ -77,34 +71,48 @@ function drawPipeToScale(context, [width, height]) {
       l = l + Math.hypot(a[0] - b[0], a[1] - b[1]);
     }
 
-    context.setLineDash([l * 0.5, l]);
-    context.lineDashOffset = mapRange(t, 0, 1, 0, -l * 0.5);
-
     // bg
     context.strokeStyle = bg;
-    context.lineWidth = 24;
-    drawShape(context, pts, false);
-    context.stroke();
-
-    // outer
-    context.strokeStyle = color;
-    context.lineWidth = 18;
-    drawShape(context, pts, false);
-    context.stroke();
-
-    // middle
-    context.setLineDash([l * 0.4, l]);
-    context.lineDashOffset = mapRange(t, 0, 1, 0, -l * 0.6);
-    context.strokeStyle = bg;
-    context.lineWidth = 12;
-    drawShape(context, pts, false);
-    context.stroke();
-
-    // inner
-    context.setLineDash([l * 0.3, l]);
+    context.lineWidth = 20;
+    context.setLineDash([l * 0.1, l]);
     context.lineDashOffset = mapRange(t, 0, 1, 0, -l * 0.7);
-    context.strokeStyle = color;
-    context.lineWidth = 6;
+    drawShape(context, pts, false);
+    context.stroke();
+
+    const step = 0.04;
+
+    context.lineWidth = 12;
+    // inner
+    context.setLineDash([
+      lerpFrames([l * 0.1, l * (0.1 + step * 3), l * 0.1], t),
+      l,
+    ]);
+    context.lineDashOffset = mapRange(t, 0, 1, 0, -l * 0.7);
+    context.strokeStyle = '#00f';
+    drawShape(context, pts, false);
+    context.stroke();
+    // inner
+    context.setLineDash([
+      lerpFrames([l * 0.1, l * (0.1 + step * 2), l * 0.1], t),
+      l,
+    ]);
+    context.lineDashOffset = mapRange(t, 0, 1, 0, -l * 0.7);
+    context.strokeStyle = '#0f0';
+    drawShape(context, pts, false);
+    context.stroke();
+    // inner
+    context.setLineDash([
+      lerpFrames([l * 0.1, l * (0.1 + step * 1), l * 0.1], t),
+      l,
+    ]);
+    context.lineDashOffset = mapRange(t, 0, 1, 0, -l * 0.7);
+    context.strokeStyle = '#f00';
+    drawShape(context, pts, false);
+    context.stroke();
+    // inner
+    context.setLineDash([l * 0.1, l]);
+    context.lineDashOffset = mapRange(t, 0, 1, 0, -l * 0.7);
+    context.strokeStyle = '#fff';
     drawShape(context, pts, false);
     context.stroke();
   };
