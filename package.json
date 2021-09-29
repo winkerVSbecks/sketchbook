@@ -32,6 +32,7 @@
     "d3-delaunay": "^4.1.5",
     "d3-quadtree": "^1.0.6",
     "eases": "^1.0.8",
+    "fettepalette": "^0.2.0",
     "flubber": "^0.4.2",
     "glsl-aastep": "^1.0.1",
     "glsl-noise": "^0.0.0",
