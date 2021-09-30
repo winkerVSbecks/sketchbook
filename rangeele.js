@@ -84,7 +84,7 @@ canvasSketch(({ width, height }) => {
  */
 function drawCircle(context, node, playhead) {
   const t = eases.cubicIn(
-    Math.abs(Math.sin(node.details.delay * Math.PI + Math.PI * playhead))
+    Math.abs(Math.sin(node.details.delay + Math.PI * playhead))
   );
   context.fillStyle = node.color;
   const r = (node.width / 2) * t;
@@ -180,7 +180,13 @@ function quadtreeToNodes(pts, width, height, bg) {
         details: {
           roundedCorner: Random.rangeFloor(0, 4),
           flatten: Random.chance(),
-          delay: mapRange(x0, 0, 8192, 0, 0.5),
+          delay: mapRange(
+            Math.hypot(x0, y0),
+            0,
+            Math.hypot(width, height),
+            0,
+            Math.PI * 0.5
+          ),
         },
       });
 
