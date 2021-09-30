@@ -2,6 +2,7 @@ const canvasSketch = require('canvas-sketch');
 const { linspace, mapRange } = require('canvas-sketch-util/math');
 const Random = require('canvas-sketch-util/random');
 const d3 = require('d3-quadtree');
+const eases = require('eases');
 const generateRandomColorRamp = require('./fettepalette');
 
 const clrs = generateRandomColorRamp({
@@ -18,21 +19,6 @@ const clrs = generateRandomColorRamp({
   minSaturationLight: [0, 0],
   maxSaturationLight: [1, 1],
 });
-
-// const clrs = generateRandomColorRamp({
-//   total: 9,
-//   centerHue: Random.range(0, 360),
-//   hueCycle: Random.range(0, 1),
-//   curveMethod: Random.pick(['lamé', 'arc', 'pow', 'powY', 'powX']),
-//   curveAccent: Random.range(0, 1),
-//   offsetTint: Random.range(0, 0.4),
-//   offsetShade: 0, // Random.range(0, 0.4),
-//   tintShadeHueShift: 0, //Random.range(0, 1),
-//   offsetCurveModTint: 0, //Random.range(0, 1),
-//   offsetCurveModShade: 0, //Random.range(0, 1),
-//   minSaturationLight: [0, 0],
-//   maxSaturationLight: [1, 1],
-// });
 
 const hsl = (c) => `hsl(${c[0]}, ${c[1] * 100}%, ${c[2] * 100}%)`;
 
@@ -69,13 +55,14 @@ canvasSketch(({ width, height }) => {
       context.fillRect(0, 0, width, height);
 
       const circles = [];
+      const pingPongPlayhead = eases.cubicIn(Math.sin(Math.PI * playhead));
 
       nodes.forEach((node) => {
         if (node.shape === 'circle') {
-          const circle = drawCircle(context, node);
+          const circle = drawCircle(context, node, playhead);
           circles.push(circle);
         } else if (node.shape === 'rounded_rect') {
-          drawRoundedRect(context, node, Math.sin(Math.PI * playhead));
+          drawRoundedRect(context, node, pingPongPlayhead);
         } else {
           drawRect(context, node);
         }
@@ -95,20 +82,33 @@ canvasSketch(({ width, height }) => {
 /**
  * Shapes
  */
-function drawCircle(context, node) {
+function drawCircle(context, node, playhead) {
+  const t = eases.cubicIn(
+    Math.abs(Math.sin(node.details.delay * Math.PI + Math.PI * playhead))
+  );
   context.fillStyle = node.color;
-  const r = node.width / 2;
-  const x = node.x + r;
-  const y = node.y + r;
+  const r = (node.width / 2) * t;
+  const d = node.width;
+  const x = node.x + node.width / 2;
+  const y = node.y + node.height / 2;
 
-  if (node.details.flatten) {
-    context.fillStyle = node.color;
-    context.fillRect(node.x, node.y, node.width, node.height);
-  } else {
-    context.beginPath();
-    context.arc(x, y, r, 0, 2 * Math.PI);
-    context.fill();
-  }
+  context.beginPath();
+  context.moveTo(x + r, y);
+  context.arcTo(x + d, y, x + d, y + d, r);
+  context.arcTo(x + d, y + d, x, y + d, r);
+  context.arcTo(x, y + d, x, y, r);
+  context.arcTo(x, y, x + d, y, r);
+  context.closePath();
+  context.fill();
+
+  // if (node.details.flatten) {
+  //   context.fillStyle = node.color;
+  //   context.fillRect(node.x, node.y, node.width, node.height);
+  // } else {
+  //   context.beginPath();
+  //   context.arc(x, y, r, 0, 2 * Math.PI);
+  //   context.fill();
+  // }
   return { x, y, r };
 }
 
@@ -180,6 +180,7 @@ function quadtreeToNodes(pts, width, height, bg) {
         details: {
           roundedCorner: Random.rangeFloor(0, 4),
           flatten: Random.chance(),
+          delay: mapRange(x0, 0, 8192, 0, 0.5),
         },
       });
 
