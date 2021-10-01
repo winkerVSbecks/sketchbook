@@ -7,7 +7,7 @@ const generateRandomColorRamp = require('./fettepalette');
 
 const clrs = generateRandomColorRamp({
   total: 9,
-  centerHue: 289.2,
+  centerHue: 289.2, // Random.range(240, 300),
   hueCycle: 0.5,
   curveMethod: 'lamé',
   curveAccent: 0.2,
@@ -27,7 +27,7 @@ const colors = clrs.all.map(hsl).filter((c) => c !== bg);
 
 const settings = {
   dimensions: [8192, 8192],
-  scaleToView: false,
+  scaleToFit: true,
   animate: true,
   duration: 2,
 };
@@ -64,7 +64,7 @@ canvasSketch(({ width, height }) => {
         } else if (node.shape === 'rounded_rect') {
           drawRoundedRect(context, node, pingPongPlayhead);
         } else {
-          drawRect(context, node);
+          drawRect(context, node, playhead);
         }
       });
 
@@ -101,14 +101,6 @@ function drawCircle(context, node, playhead) {
   context.closePath();
   context.fill();
 
-  // if (node.details.flatten) {
-  //   context.fillStyle = node.color;
-  //   context.fillRect(node.x, node.y, node.width, node.height);
-  // } else {
-  //   context.beginPath();
-  //   context.arc(x, y, r, 0, 2 * Math.PI);
-  //   context.fill();
-  // }
   return { x, y, r };
 }
 
@@ -132,9 +124,31 @@ function drawRoundedRect(context, node, playhead) {
   context.fill();
 }
 
-function drawRect(context, node) {
+function drawRect(context, node, playhead) {
   context.fillStyle = node.color;
-  context.fillRect(node.x, node.y, node.width, node.height);
+  // context.fillRect(node.x, node.y, node.width, node.height);
+
+  const { x, y, width, height } = node;
+  const cx = x + width / 2;
+  const cy = y + height / 2;
+
+  const t =
+    width < 512
+      ? eases.expoInOut(
+          Math.abs(Math.sin(Math.PI * playhead - node.details.delay))
+        )
+      : 1;
+
+  const w = width * t;
+  const h = height * t;
+
+  context.beginPath();
+  context.moveTo(cx - w / 2, cy - h / 2);
+  context.lineTo(cx + w / 2, cy - h / 2);
+  context.lineTo(cx + w / 2, cy + h / 2);
+  context.lineTo(cx - w / 2, cy + h / 2);
+  context.closePath();
+  context.fill();
 }
 
 function connection(context, circle1, circle2, color) {
