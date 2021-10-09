@@ -3,7 +3,7 @@ const { linspace, mapRange } = require('canvas-sketch-util/math');
 const Random = require('canvas-sketch-util/random');
 const d3 = require('d3-quadtree');
 const eases = require('eases');
-const generateRandomColorRamp = require('./fettepalette');
+const { generateRandomColorRamp } = require('fettepalette');
 
 const clrs = generateRandomColorRamp({
   total: 9,
