@@ -1,7 +1,6 @@
 const canvasSketch = require('canvas-sketch');
 const { mapRange } = require('canvas-sketch-util/math');
 const Random = require('canvas-sketch-util/random');
-const d3 = require('d3-quadtree');
 const eases = require('eases');
 const { generateRandomColorRamp } = require('fettepalette/dist/index.umd');
 

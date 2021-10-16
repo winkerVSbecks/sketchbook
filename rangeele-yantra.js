@@ -3,7 +3,7 @@ const { linspace, mapRange } = require('canvas-sketch-util/math');
 const Random = require('canvas-sketch-util/random');
 const d3 = require('d3-quadtree');
 const eases = require('eases');
-const { generateRandomColorRamp } = require('fettepalette');
+const generateRandomColorRamp = require('./fettepalette');
 
 const clrs = generateRandomColorRamp({
   total: 9,
@@ -26,7 +26,7 @@ const bg = hsl(Random.pick(clrs.light));
 const colors = clrs.all.map(hsl).filter((c) => c !== bg);
 
 const settings = {
-  dimensions: [8192, 8192],
+  dimensions: [1024, 1024],
   scaleToFit: true,
   animate: true,
   duration: 2,
@@ -41,40 +41,39 @@ const state = {
 };
 
 canvasSketch(({ width, height }) => {
-  const pts = linspace(2000).map(() => [
-    Random.rangeFloor(0, width),
-    Random.rangeFloor(0, height),
-  ]);
-
-  const nodes = quadtreeToNodes(pts, width, height, bg);
+  let size = Math.ceil(width > height ? height : width / 32) * 32;
+  let nodes = quadtreeToNodes(size, bg);
 
   return {
+    resize({ width, height }) {
+      size = width > height ? height : width;
+      nodes = quadtreeToNodes(size, bg);
+    },
     render({ context, width, height, playhead }) {
       context.clearRect(0, 0, width, height);
+      context.fillStyle = '#fff';
+      context.fillRect(0, 0, width, height);
+
+      context.translate(width / 2 - size / 2, height / 2 - size / 2);
+
+      const region = new Path2D();
+      region.rect(0, 0, size, size);
+      context.clip(region, 'evenodd');
+
       context.fillStyle = bg;
       context.fillRect(0, 0, width, height);
 
-      const circles = [];
       const pingPongPlayhead = eases.cubicIn(Math.sin(Math.PI * playhead));
 
       nodes.forEach((node) => {
         if (node.shape === 'circle') {
-          const circle = drawCircle(context, node, playhead);
-          circles.push(circle);
+          drawCircle(context, node, playhead);
         } else if (node.shape === 'rounded_rect') {
           drawRoundedRect(context, node, pingPongPlayhead);
         } else {
           drawRect(context, node, playhead);
         }
       });
-
-      if (circles.length > 1) {
-        // connection(context, circles[0], circles[1], clr());
-      }
-
-      // for (let index = 1; index < circles.length; index++) {
-      //   connection(context, circles[index - 1], circles[index], clr());
-      // }
     },
   };
 }, settings);
@@ -100,8 +99,6 @@ function drawCircle(context, node, playhead) {
   context.arcTo(x, y, x + d, y, r);
   context.closePath();
   context.fill();
-
-  return { x, y, r };
 }
 
 function drawRoundedRect(context, node, playhead) {
@@ -126,7 +123,6 @@ function drawRoundedRect(context, node, playhead) {
 
 function drawRect(context, node, playhead) {
   context.fillStyle = node.color;
-  // context.fillRect(node.x, node.y, node.width, node.height);
 
   const { x, y, width, height } = node;
   const cx = x + width / 2;
@@ -151,35 +147,35 @@ function drawRect(context, node, playhead) {
   context.fill();
 }
 
-function connection(context, circle1, circle2, color) {
-  context.lineWidth = 12;
-  context.strokeStyle = color;
-  context.beginPath();
-  context.moveTo(circle1.x, circle1.y);
-  context.lineTo(circle2.x, circle2.y);
-  context.stroke();
-}
+function quadtreeToNodes(size, bg) {
+  let pts = linspace(2000).map(() => [
+    Random.rangeFloor(0, size),
+    Random.rangeFloor(0, size),
+  ]);
 
-function quadtreeToNodes(pts, width, height, bg) {
   const quadtree = d3
     .quadtree()
     .extent([
       [0, 0],
-      [width, height],
+      [size, size],
     ])
     .addAll(pts);
 
   const nodes = [];
   quadtree.visit((node, x0, y0, x1, y1) => {
+    const min = Math.max(size / 256, 16);
+    const max = size / 2;
+
     const width = y1 - y0;
-    const isMega = width >= 4096;
+    const isMega = width >= max;
     const shape =
-      // width === Random.pick([64, 128, 256, 512, 1024, 2048, 4096])
-      width > 512 && Random.chance() && (isMega ? state.megaCircles < 2 : true)
+      width > size / 16 &&
+      Random.chance() &&
+      (isMega ? state.megaCircles < 2 : true)
         ? 'circle'
         : Random.pick(['rect', 'rounded_rect']);
 
-    const dontSkip = Random.chance() && width <= 4096 && width > 32;
+    const dontSkip = Random.chance() && width <= max && width > min;
 
     if (dontSkip || state.megaSkips > 3) {
       nodes.push({
@@ -197,19 +193,19 @@ function quadtreeToNodes(pts, width, height, bg) {
           delay: mapRange(
             Math.hypot(x0, y0),
             0,
-            Math.hypot(width, height),
+            Math.hypot(size, size),
             0,
             Math.PI * 0.5
           ),
         },
       });
 
-      if (shape === 'circle' && width >= 4096) {
+      if (shape === 'circle' && width >= max) {
         state.megaCircles++;
-      } else if (shape === 'circle' && width > 1024) {
+      } else if (shape === 'circle' && width > size / 8) {
         state.circles++;
       }
-    } else if (width >= 4096) {
+    } else if (width >= max) {
       state.megaSkips++;
     }
 
