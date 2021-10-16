@@ -26,7 +26,7 @@ const bg = hsl(Random.pick(clrs.light));
 const colors = clrs.all.map(hsl).filter((c) => c !== bg);
 
 const settings = {
-  dimensions: [1080, 1080],
+  dimensions: [1080 * 2, 1080 * 2],
   scaleToFit: true,
   animate: true,
   duration: 2,
@@ -41,8 +41,8 @@ canvasSketch(({ width, height }) => {
         height,
         color,
         1,
-        // idx % 2 === 0 ? delayFunctions.bottomMiddle : delayFunctions.topLeft
-        delayFunctions.topLeft
+        idx % 2 === 0 ? delayFunctions.bottomMiddle : delayFunctions.topLeft
+        // delayFunctions.topLeft
       )
     );
   });
