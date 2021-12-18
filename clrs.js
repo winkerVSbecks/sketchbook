@@ -7,6 +7,26 @@ const hsluv = require('hsluv');
 
 const some = ['#3333ff', '#fc7f95', '#fbfc6e', '#55f9fc', '#fefefc'];
 
+const fromDavid = [
+  ['red', 'white', '#202123'],
+  ['#eac328', '#CE6D54', '#354046'],
+  ['#b03b5f', '#e1e6eb', '#07080b'],
+  ['#E39E84', '#73BEDE', '#FDF8E7'],
+  ['#fff', '#E17887', '#90C6E6'],
+  ['#DF3F1F', '#fff', '#A61C54'],
+  ['turquoise', 'hotpink', '#212121'],
+  ['gold', 'darkgray', 'purple'],
+  ['#2487c6', '#f7f7f7', '#202124'],
+  ['#fff', '#202124', '#fdd'],
+  ['#ffd919', '#262104', '#fffbe6'],
+  ['#ff4f19', '#15084d', '#5ce6e6'],
+  ['#ee726b', '#ffc5c7', '#fef9c6'],
+  ['#0a1966', '#ffef0d', '#fafafa'],
+  ['#f9f9f9', '#ff0000', '#0000ff'],
+  ['#226699', '#dd2e44', '#ffcc4d'],
+  ['#021d34', '#228fca', '#dcedf0'],
+];
+
 function fillHsluv(h, s, l) {
   const rgb = hsluv.hsluvToRgb([h, s, l]);
   return `rgb(${rgb[0] * 255}, ${rgb[1] * 255}, ${rgb[2] * 255})`;
