@@ -7,8 +7,6 @@ const settings = {
   dimensions: [1080, 1080],
   animate: true,
   duration: 6,
-  // fps: 24,
-  // playbackRate: 'throttle',
 };
 
 const config = {
@@ -23,7 +21,6 @@ const config = {
 
 const state = {
   grid: [],
-  walkers: [],
 };
 
 const sketch = () => {
@@ -50,35 +47,18 @@ const sketch = () => {
 /**
  * Walker
  */
-function spawnWalker() {
-  const doSpawn = !state.grid.every((cell) => cell.occupied);
-
-  if (doSpawn) {
-    const walker = makeWalker();
-
-    if (walker) {
-      state.walkers.push(walker);
-    }
-  }
-}
-
 function makeWalker() {
-  const start = getStart();
+  const start = {
+    x: Random.rangeFloor(1, config.resolution - 1),
+    y: Random.rangeFloor(1, config.resolution - 1),
+    moveTo: true,
+  };
 
-  if (start) {
-    (start.moveTo = true), setOccupied(start);
-
-    return {
-      path: [start],
-      color: clrs.ink(),
-      state: 'alive',
-    };
-  }
-  return null;
-}
-
-function getStart() {
-  return Random.pick(state.grid.filter((cell) => !cell.occupied));
+  return {
+    path: [start],
+    color: clrs.ink(),
+    state: 'alive',
+  };
 }
 
 function step(walker) {
@@ -86,12 +66,25 @@ function step(walker) {
   let current = walker.path[currentIndex];
   let next = findNextStep(current);
 
+  while (!next) {
+    if (currentIndex > 0) {
+      currentIndex--;
+    } else {
+      break;
+    }
+
+    current = walker.path[currentIndex];
+    next = findNextStep(current);
+    if (next) {
+      next.moveTo = true;
+    }
+  }
+
   if (next) {
     setOccupied(next);
     walker.path.push(next);
   } else {
     walker.state = 'dead';
-    spawnWalker();
   }
 }
 
