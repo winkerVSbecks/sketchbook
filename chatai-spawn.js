@@ -1,42 +1,18 @@
 const canvasSketch = require('canvas-sketch');
 const { mapRange, lerpFrames, clamp } = require('canvas-sketch-util/math');
 const Random = require('canvas-sketch-util/random');
-// const clrs = require('./clrs').clrs();
-const { generateRandomColorRamp } = require('fettepalette/dist/index.umd');
+const clrs = require('./clrs').clrs();
 
 const settings = {
   dimensions: [1080, 1080],
   animate: true,
-  duration: 12,
+  duration: 6,
   // fps: 24,
   // playbackRate: 'throttle',
 };
 
-const colorSystem = generateRandomColorRamp({
-  total: 9,
-  centerHue: Random.range(0, 300),
-  hueCycle: 0.5,
-  curveMethod: 'lamé',
-  curveAccent: 0.2,
-  offsetTint: 0.251,
-  offsetShade: 0.01,
-  tintShadeHueShift: 0.0,
-  offsetCurveModTint: 0.03,
-  offsetCurveModShade: 0.03,
-  minSaturationLight: [0, 0],
-  maxSaturationLight: [1, 1],
-});
-
-const hsl = (c) => `hsla(${c[0]}, ${c[1] * 100}%, ${c[2] * 100}%, 1)`;
-const bg = hsl(Random.pick(colorSystem.dark));
-const inkColors = colorSystem.light.map(hsl).filter((c) => c !== bg);
-const clrs = {
-  bg,
-  ink: () => Random.pick(inkColors),
-};
-
 const config = {
-  resolution: 60,
+  resolution: 40,
   size: 5,
   walkerCount: 10,
   colors: {
@@ -51,104 +27,29 @@ const state = {
 };
 
 const sketch = () => {
-  return {
-    begin() {
-      state.grid = makeGrid();
-      state.walkers = new Array(config.walkerCount).fill(null).map(makeWalker);
-    },
-    render({ context, width, height }) {
-      // clear
-      context.clearRect(0, 0, width, height);
-      context.fillStyle = config.colors.background;
-      context.fillRect(0, 0, width, height);
+  state.grid = makeGrid();
+  state.walkers = new Array(config.walkerCount).fill(null).map(makeWalker);
 
-      drawGrid(context, state.grid, width, height);
+  return ({ context, width, height }) => {
+    // clear
+    context.clearRect(0, 0, width, height);
+    context.fillStyle = config.colors.background;
+    context.fillRect(0, 0, width, height);
 
-      state.walkers.forEach((walker) => {
-        if (walker.state === 'alive') {
-          step(walker);
-        }
-        drawWalker(context, walker, width, height);
-      });
-    },
+    drawGrid(context, state.grid, width, height);
+
+    state.walkers.forEach((walker) => {
+      if (walker.state === 'alive') {
+        step(walker);
+      }
+      drawWalker(context, walker, width, height);
+    });
   };
 };
 
 /**
  * Walker
  */
-const walkerTypes = [
-  ({ x, y }) =>
-    Random.pick(
-      [
-        { x: x + 1, y: y },
-        { x: x - 1, y: y },
-        { x: x, y: y + 1 },
-        { x: x, y: y - 1 },
-      ].filter(validOption)
-    ),
-  ({ x, y }) => {
-    const preferred = { x: x + 1, y: y };
-
-    if (validOption(preferred)) {
-      return preferred;
-    }
-
-    return Random.pick(
-      [
-        { x: x - 1, y: y },
-        { x: x, y: y + 1 },
-        { x: x, y: y - 1 },
-      ].filter(validOption)
-    );
-  },
-  ({ x, y }) => {
-    const preferred = { x: x - 1, y: y };
-
-    if (validOption(preferred)) {
-      return preferred;
-    }
-
-    return Random.pick(
-      [
-        { x: x + 1, y: y },
-        { x: x, y: y + 1 },
-        { x: x, y: y - 1 },
-      ].filter(validOption)
-    );
-  },
-  ({ x, y }) => {
-    const preferred = { x: x, y: y + 1 };
-
-    if (validOption(preferred)) {
-      return preferred;
-    }
-
-    return Random.pick(
-      [
-        { x: x + 1, y: y },
-        { x: x - 1, y: y },
-        { x: x, y: y - 1 },
-      ].filter(validOption)
-    );
-  },
-  ({ x, y }) => {
-    const preferred = { x: x, y: y - 1 };
-
-    if (validOption(preferred)) {
-      return preferred;
-    }
-
-    return Random.pick(
-      [
-        { x: x + 1, y: y },
-        { x: x - 1, y: y },
-        { x: x, y: y + 1 },
-      ].filter(validOption)
-    );
-  },
-];
-
 function spawnWalker() {
   const doSpawn = !state.grid.every((cell) => cell.occupied);
 
@@ -171,7 +72,6 @@ function makeWalker() {
       path: [start],
       color: clrs.ink(),
       state: 'alive',
-      nextStep: Random.pick(walkerTypes),
     };
   }
   return null;
@@ -184,7 +84,7 @@ function getStart() {
 function step(walker) {
   let currentIndex = walker.path.length - 1;
   let current = walker.path[currentIndex];
-  let next = walker.nextStep(current);
+  let next = findNextStep(current);
 
   if (next) {
     setOccupied(next);
@@ -263,10 +163,6 @@ function setOccupied({ x, y }) {
   if (idx >= 0) {
     state.grid[idx].occupied = true;
   }
-}
-
-function validOption(option) {
-  return inBounds(option) && !isOccupied(option);
 }
 
 /**
