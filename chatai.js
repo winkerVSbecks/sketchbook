@@ -7,12 +7,12 @@ const { generateRandomColorRamp } = require('fettepalette/dist/index.umd');
 const settings = {
   dimensions: [1080, 1080],
   animate: true,
-  duration: 12,
+  // duration: 12,
   // fps: 24,
   // playbackRate: 'throttle',
 };
 
-const colorSystem = generateRandomColorRamp({
+const colorConfig = {
   total: 9,
   centerHue: Random.range(0, 300),
   hueCycle: 0.5,
@@ -25,10 +25,17 @@ const colorSystem = generateRandomColorRamp({
   offsetCurveModShade: 0.03,
   minSaturationLight: [0, 0],
   maxSaturationLight: [1, 1],
+};
+
+const colorSystem = generateRandomColorRamp(colorConfig);
+
+const darkColorSystem = generateRandomColorRamp({
+  ...colorConfig,
+  maxSaturationLight: [0.25, 0.25],
 });
 
 const hsl = (c) => `hsla(${c[0]}, ${c[1] * 100}%, ${c[2] * 100}%, 1)`;
-const bg = hsl(Random.pick(colorSystem.dark));
+const bg = hsl(Random.pick(darkColorSystem.dark));
 const inkColors = colorSystem.light.map(hsl).filter((c) => c !== bg);
 const clrs = {
   bg,
@@ -38,7 +45,7 @@ const clrs = {
 const config = {
   resolution: 60,
   size: 5,
-  walkerCount: 10,
+  walkerCount: Random.rangeFloor(1, 20),
   colors: {
     background: clrs.bg,
     grid: clrs.ink(),
@@ -78,74 +85,65 @@ const sketch = () => {
  * Walker
  */
 const walkerTypes = [
-  ({ x, y }) =>
-    Random.pick(
-      [
+  () =>
+    ({ x, y }) =>
+      Random.pick(
+        [
+          { x: x + 1, y: y },
+          { x: x - 1, y: y },
+          { x: x, y: y + 1 },
+          { x: x, y: y - 1 },
+        ].filter(validOption)
+      ),
+  () => {
+    let preferredOption = Random.pick([0, 1]);
+
+    return ({ x, y }) => {
+      const options = [
         { x: x + 1, y: y },
         { x: x - 1, y: y },
         { x: x, y: y + 1 },
         { x: x, y: y - 1 },
-      ].filter(validOption)
-    ),
-  ({ x, y }) => {
-    const preferred = { x: x + 1, y: y };
+      ];
+      let preferred = options[preferredOption];
 
-    if (validOption(preferred)) {
-      return preferred;
-    }
+      // Try bouncing once
+      if (!validOption(preferred)) {
+        preferredOption = preferredOption === 0 ? 1 : 0;
+        preferred = options[preferredOption];
+      }
 
-    return Random.pick(
-      [
-        { x: x - 1, y: y },
-        { x: x, y: y + 1 },
-        { x: x, y: y - 1 },
-      ].filter(validOption)
-    );
+      if (validOption(preferred)) {
+        return preferred;
+      }
+
+      return Random.pick(options.filter(validOption));
+    };
   },
-  ({ x, y }) => {
-    const preferred = { x: x - 1, y: y };
+  () => {
+    let preferredOption = Random.pick([2, 3]);
 
-    if (validOption(preferred)) {
-      return preferred;
-    }
-
-    return Random.pick(
-      [
-        { x: x + 1, y: y },
-        { x: x, y: y + 1 },
-        { x: x, y: y - 1 },
-      ].filter(validOption)
-    );
-  },
-  ({ x, y }) => {
-    const preferred = { x: x, y: y + 1 };
-
-    if (validOption(preferred)) {
-      return preferred;
-    }
-
-    return Random.pick(
-      [
-        { x: x + 1, y: y },
-        { x: x - 1, y: y },
-        { x: x, y: y - 1 },
-      ].filter(validOption)
-    );
-  },
-  ({ x, y }) => {
-    const preferred = { x: x, y: y - 1 };
-
-    if (validOption(preferred)) {
-      return preferred;
-    }
-
-    return Random.pick(
-      [
+    return ({ x, y }) => {
+      const options = [
         { x: x + 1, y: y },
         { x: x - 1, y: y },
         { x: x, y: y + 1 },
-      ].filter(validOption)
-    );
+        { x: x, y: y - 1 },
+      ];
+      let preferred = options[preferredOption];
+
+      // Try bouncing once
+      if (!validOption(preferred)) {
+        preferredOption = preferredOption === 2 ? 3 : 2;
+        preferred = options[preferredOption];
+      }
+
+      if (validOption(preferred)) {
+        return preferred;
+      }
+
+      return Random.pick(options.filter(validOption));
+    };
   },
 ];
 
@@ -171,7 +169,7 @@ function makeWalker() {
       path: [start],
       color: clrs.ink(),
       state: 'alive',
-      nextStep: Random.pick(walkerTypes),
+      nextStep: Random.pick(walkerTypes)(),
     };
   }
   return null;
@@ -289,3 +287,75 @@ function xyToCoords(x, y, width, height) {
 }
 
 canvasSketch(sketch, settings);
+
+// const walkerTypes = [
+//   ({ x, y }) =>
+//     Random.pick(
+//       [
+//         { x: x + 1, y: y },
+//         { x: x - 1, y: y },
+//         { x: x, y: y + 1 },
+//         { x: x, y: y - 1 },
+//       ].filter(validOption)
+//     ),
+//   ({ x, y }) => {
+//     const preferred = { x: x + 1, y: y };
+
+//     if (validOption(preferred)) {
+//       return preferred;
+//     }
+
+//     return Random.pick(
+//       [
+//         { x: x - 1, y: y },
+//         { x: x, y: y + 1 },
+//         { x: x, y: y - 1 },
+//       ].filter(validOption)
+//     );
+//   },
+//   ({ x, y }) => {
+//     const preferred = { x: x - 1, y: y };
+
+//     if (validOption(preferred)) {
+//       return preferred;
+//     }
+
+//     return Random.pick(
+//       [
+//         { x: x + 1, y: y },
+//         { x: x, y: y + 1 },
+//         { x: x, y: y - 1 },
+//       ].filter(validOption)
+//     );
+//   },
+//   ({ x, y }) => {
+//     const preferred = { x: x, y: y + 1 };
+
+//     if (validOption(preferred)) {
+//       return preferred;
+//     }
+
+//     return Random.pick(
+//       [
+//         { x: x + 1, y: y },
+//         { x: x - 1, y: y },
+//         { x: x, y: y - 1 },
+//       ].filter(validOption)
+//     );
+//   },
+//   ({ x, y }) => {
+//     const preferred = { x: x, y: y - 1 };
+
+//     if (validOption(preferred)) {
+//       return preferred;
+//     }
+
+//     return Random.pick(
+//       [
+//         { x: x + 1, y: y },
+//         { x: x - 1, y: y },
+//         { x: x, y: y + 1 },
+//       ].filter(validOption)
+//     );
+//   },
+// ];
