@@ -314,7 +314,7 @@ function makeCircles() {
     packAttempts: 500,
     maxCount: 1000,
     minRadius: config.resolution * 0.0625,
-    maxRadius: config.resolution * 0.6,
+    maxRadius: config.resolution * 0.75,
     padding: 0.5,
     sample: () => [
       Random.rangeFloor(-config.resolution, config.resolution),
@@ -362,9 +362,9 @@ function inCircle(circle, { x, y }) {
  */
 function createColors() {
   const colorConfig = {
-    total: 12,
-    centerHue: Random.range(280, 360),
-    hueCycle: 0,
+    total: 9,
+    centerHue: Random.range(0, 60),
+    hueCycle: 0.25,
     curveMethod: 'lamé',
     curveAccent: 0.2,
     offsetTint: 0.251,
@@ -379,12 +379,13 @@ function createColors() {
   const colorSystem = generateRandomColorRamp(colorConfig);
   const midColorSystem = generateRandomColorRamp({
     ...colorConfig,
-    centerHue: Random.range(300, 360),
+    hueCycle: 0.5,
+    centerHue: Random.range(70, 160),
     maxSaturationLight: [1, 0.5],
   });
   const darkColorSystem = generateRandomColorRamp({
     ...colorConfig,
-    centerHue: Random.range(190, 250),
+    centerHue: Random.range(220, 340),
     maxSaturationLight: [0.5, 0.25],
   });
 
