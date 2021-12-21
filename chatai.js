@@ -13,13 +13,20 @@ const settings = {
   // playbackRate: 'throttle',
 };
 
+window.fxHash = {
+  size: 3,
+  monoChrome: Random.chance(),
+};
+
 const config = {
-  resolution: 90,
-  size: 5,
-  walkerCount: 4, //Random.rangeFloor(20, 40),
-  colors: createColors(),
+  resolution: window.fxHash.size * 64,
+  size: [12, 5, 3][window.fxHash.size - 1],
+  walkerCount: Random.rangeFloor(20, 40),
+  colors: createColors(window.fxHash.monoChrome),
   margin: 0,
 };
+
+console.log(config);
 
 const state = {
   grid: [],
@@ -34,19 +41,17 @@ const state = {
 const sketch = () => {
   return {
     begin({ width, height }) {
-      state.pts =
-        state.pts.length > 0
-          ? state.pts
-          : new Array(25)
-              .fill(null)
-              .map(() => [
-                Random.rangeFloor(0, config.resolution),
-                Random.rangeFloor(0, config.resolution),
-              ]);
-      state.nodes =
-        state.nodes.length > 0
-          ? state.nodes
-          : quadTreeToNodes(state.pts, width, height);
+      state.pts = new Array(25)
+        .fill(null)
+        .map(() => [
+          Random.rangeFloor(0, config.resolution),
+          Random.rangeFloor(0, config.resolution),
+        ]);
+      state.nodes = quadTreeToNodes(
+        state.pts,
+        config.resolution,
+        config.resolution
+      );
       state.grid = makeGrid();
       state.walkers = new Array(config.walkerCount).fill(null).map(makeWalker);
     },
@@ -56,16 +61,32 @@ const sketch = () => {
       context.fillStyle = config.colors.background;
       context.fillRect(0, 0, width, height);
 
-      // context.lineWidth = 2;
-      // context.strokeStyle = config.colors.grid;
-      // state.nodes.forEach((node) => {
-      //   context.strokeRect(
-      //     toWorld(node.x, width),
-      //     toWorld(node.y, height),
-      //     toWorld(node.width, width),
-      //     toWorld(node.height, height)
-      //   );
-      // });
+      context.lineWidth = 2;
+      context.strokeStyle = config.colors.grid;
+      state.nodes.forEach((node) => {
+        if (toWorld(node.x + node.width, width) > width) {
+          // console.log(node);
+        }
+
+        context.strokeRect(
+          toWorld(node.x, width),
+          toWorld(node.y, height),
+          toWorld(node.width, width),
+          toWorld(node.height, height)
+        );
+      });
+
+      state.pts.forEach(([_x, _y]) => {
+        context.fillStyle = config.colors.grid;
+        const [x, y] = xyToCoords(_x, _y, width, height);
+
+        context.fillRect(
+          x - config.size,
+          y - config.size,
+          config.size * 2,
+          config.size * 2
+        );
+      });
 
       context.lineWidth = 8;
       const node = state.nodes[state.activeNode];
@@ -77,34 +98,34 @@ const sketch = () => {
         toWorld(node.height, height)
       );
 
-      for (let index = 0; index < 100; index++) {
-        drawGrid(context, state.grid, width, height);
+      // for (let index = 0; index < 100; index++) {
+      drawGrid(context, state.grid, width, height);
 
-        state.walkers.forEach((walker) => {
-          if (walker.state === 'alive') {
-            step(walker);
-          }
-          drawWalker(context, walker, width, height);
-        });
-
-        const validOptions = state.grid
-          .filter((cell) => !cell.occupied)
-          .filter((cell) => inNode(cell));
-
-        // if (state.walkers.length === 0) {
-        //   spawnWalker();
-        // }
-
-        if (
-          validOptions.length === 0 &&
-          state.activeNode < state.nodes.length - 1
-        ) {
-          state.activeNode++;
-          spawnWalker();
-        } else if (state.activeNode === state.nodes.length - 1) {
-          state.mode = 'complete';
+      state.walkers.forEach((walker) => {
+        if (walker.state === 'alive') {
+          step(walker);
         }
+        drawWalker(context, walker, width, height);
+      });
+
+      const validOptions = state.grid
+        .filter((cell) => !cell.occupied)
+        .filter((cell) => inNode(cell));
+
+      // if (state.walkers.length === 0) {
+      //   spawnWalker();
+      // }
+
+      if (
+        validOptions.length === 0 &&
+        state.activeNode < state.nodes.length - 1
+      ) {
+        state.activeNode++;
+        spawnWalker();
+      } else if (state.activeNode === state.nodes.length - 1) {
+        state.mode = 'complete';
       }
+      // }
     },
   };
 };
@@ -113,16 +134,16 @@ const sketch = () => {
  * Walker
  */
 const walkerTypes = [
-  () =>
-    ({ x, y }) =>
-      Random.pick(
-        [
-          { x: x + 1, y: y },
-          { x: x - 1, y: y },
-          { x: x, y: y + 1 },
-          { x: x, y: y - 1 },
-        ].filter(validOption)
-      ),
+  // () =>
+  //   ({ x, y }) =>
+  //     Random.pick(
+  //       [
+  //         { x: x + 1, y: y },
+  //         { x: x - 1, y: y },
+  //         { x: x, y: y + 1 },
+  //         { x: x, y: y - 1 },
+  //       ].filter(validOption)
+  //     ),
   () => {
     let preferredOption = Random.pick([0, 1]);
 
@@ -321,35 +342,53 @@ function toWorld(v, size) {
  * Quadtree
  */
 function quadTreeToNodes(pts, width, height) {
+  // Quad tree seems to go 64 -> 128 -> 256 -> 512 -> etc
   const quadtree = d3
     .quadtree()
+    // .cover(0, 0)
+    // .cover(width, 0)
+    // .cover(width, height)
+    // .cover(0, height)
     .extent([
       [0, 0],
-      [config.resolution, config.resolution],
-      // [config.margin * width, config.margin * height],
-      // [width - config.margin * width, height - config.margin * height],
+      [width - 4, height - 4],
     ])
     .addAll(pts);
+  console.log(quadtree.extent());
 
   const nodes = [];
+  const splitNodes = { 1: [], 2: [], 3: [], 4: [] };
+
   quadtree.visitAfter((node, x0, y0, x1, y1) => {
-    nodes.push({
+    const n = {
       x: x0,
       y: y0,
       x1,
       y1,
       width: y1 - y0,
       height: x1 - x0,
-    });
+    };
+
+    if (x0 < width / 2 && y0 < height / 2) {
+      splitNodes[1].push(n);
+    } else if (x0 >= width / 2 && y0 < height / 2) {
+      splitNodes[2].push(n);
+    } else if (x0 < width / 2 && y0 > height / 2) {
+      splitNodes[3].push(n);
+    } else {
+      splitNodes[4].push(n);
+    }
+
+    nodes.push(n);
   });
   return nodes;
 }
 
-function createColors() {
+function createColors(monoChrome) {
   const colorConfig = {
     total: 9,
     centerHue: Random.range(0, 360),
-    hueCycle: 1,
+    hueCycle: monoChrome ? 0 : 1,
     curveMethod: 'lamé',
     curveAccent: 0.2,
     offsetTint: 0.251,
