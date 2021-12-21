@@ -3,10 +3,9 @@ const { mapRange, lerpFrames, clamp } = require('canvas-sketch-util/math');
 const Random = require('canvas-sketch-util/random');
 // const clrs = require('./clrs').clrs();
 const { generateRandomColorRamp } = require('fettepalette/dist/index.umd');
-const d3 = require('d3-quadtree');
 
 const settings = {
-  dimensions: [2048, 2048],
+  dimensions: [1080, 1080],
   animate: true,
   // duration: 12,
   // fps: 24,
@@ -15,8 +14,8 @@ const settings = {
 
 const colorConfig = {
   total: 9,
-  centerHue: Random.range(0, 360),
-  hueCycle: 1,
+  centerHue: Random.range(0, 300),
+  hueCycle: 0.5,
   curveMethod: 'lamé',
   curveAccent: 0.2,
   offsetTint: 0.251,
@@ -24,7 +23,7 @@ const colorConfig = {
   tintShadeHueShift: 0.0,
   offsetCurveModTint: 0.03,
   offsetCurveModShade: 0.03,
-  minSaturationLight: [0.5, 0.5],
+  minSaturationLight: [0, 0],
   maxSaturationLight: [1, 1],
 };
 
@@ -44,9 +43,9 @@ const clrs = {
 };
 
 const config = {
-  resolution: 120,
+  resolution: 60,
   size: 5,
-  walkerCount: Random.rangeFloor(20, 40),
+  walkerCount: Random.rangeFloor(1, 20),
   colors: {
     background: clrs.bg,
     grid: clrs.ink(),
@@ -56,17 +55,13 @@ const config = {
 const state = {
   grid: [],
   walkers: [],
-  pts: [],
 };
 
 const sketch = () => {
   return {
-    begin({ width, height }) {
+    begin() {
       state.grid = makeGrid();
       state.walkers = new Array(config.walkerCount).fill(null).map(makeWalker);
-      state.pts = new Array(2500)
-        .fill(null)
-        .map(() => [Random.rangeFloor(0, width), Random.rangeFloor(0, height)]);
     },
     render({ context, width, height }) {
       // clear
@@ -81,13 +76,6 @@ const sketch = () => {
           step(walker);
         }
         drawWalker(context, walker, width, height);
-      });
-
-      const nodes = quadtreeToNodes(state.pts, width, height);
-      context.lineWidth = 2;
-      nodes.forEach((node) => {
-        context.strokeStyle = config.colors.grid;
-        context.strokeRect(node.x, node.y, node.width, node.height);
       });
     },
   };
@@ -238,8 +226,8 @@ function drawWalker(context, walker, width, height) {
 function makeGrid() {
   const grid = [];
 
-  for (let y = 0; y <= config.resolution; y++) {
-    for (let x = 0; x <= config.resolution; x++) {
+  for (let y = 1; y < config.resolution; y++) {
+    for (let x = 1; x < config.resolution; x++) {
       grid.push({ x, y, occupied: false });
     }
   }
@@ -284,46 +272,18 @@ function validOption(option) {
  */
 // i = x + width*y;
 function xyToIndex(x, y) {
-  return x + (config.resolution + 1) * y;
+  return x - 1 + (config.resolution - 1) * (y - 1);
 }
 
 function inBounds({ x, y }) {
-  return x >= 0 && x <= config.resolution && y >= 0 && y <= config.resolution;
+  return x > 0 && x < config.resolution && y > 0 && y < config.resolution;
 }
 
 function xyToCoords(x, y, width, height) {
-  return [toWorld(x, width), toWorld(y, height)];
-}
-
-function toWorld(v, size) {
-  const margin = 0.03 * size;
-  return mapRange(v, 0, config.resolution, margin, size - margin);
-}
-
-/**
- * Quadtree
- */
-function quadtreeToNodes(pts, width, height) {
-  const quadtree = d3
-    .quadtree()
-    .extent([
-      [0, 0],
-      [width, height],
-    ])
-    .addAll(pts);
-
-  const nodes = [];
-  quadtree.visit((node, x0, y0, x1, y1) => {
-    nodes.push({
-      x: x0,
-      y: y0,
-      x1,
-      y1,
-      width: y1 - y0,
-      height: x1 - x0,
-    });
-  });
-  return nodes;
+  return [
+    (x * width) / config.resolution - 1,
+    (y * height) / config.resolution - 1,
+  ];
 }
 
 canvasSketch(sketch, settings);

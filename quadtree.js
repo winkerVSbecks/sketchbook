@@ -40,14 +40,14 @@ canvasSketch(() => {
       const nodes = quadtreeToNodes(pts, width, height);
       context.strokeStyle = '#fff';
       context.lineWidth = 2;
-      nodes.forEach(node => {
+      nodes.forEach((node) => {
         context.fillStyle = clr();
 
         const gradient = context.createLinearGradient(
           node.x,
           node.y,
           node.x1,
-          node.y1,
+          node.y1
         );
 
         const color = clr();
@@ -57,7 +57,7 @@ canvasSketch(() => {
           chroma(color)
             .brighten(2)
             // .alpha(0)
-            .css(),
+            .css()
         );
 
         context.fillStyle = gradient;
@@ -66,11 +66,8 @@ canvasSketch(() => {
       });
 
       // const nodes2 = quadtreeToNodes(pts2, width, height);
-      nodes.forEach(node => {
-        context.fillStyle = chroma(clr())
-          .darken(2)
-          .alpha(0.1)
-          .css();
+      nodes.forEach((node) => {
+        context.fillStyle = chroma(clr()).darken(2).alpha(0.1).css();
 
         linspace(500).forEach(() => {
           const cx = Random.rangeFloor(node.x, node.x1);
@@ -79,7 +76,7 @@ canvasSketch(() => {
         });
       });
 
-      nodes.forEach(node => {
+      nodes.forEach((node) => {
         const color = clr();
 
         const x = node.x + node.width / 2;
@@ -91,7 +88,7 @@ canvasSketch(() => {
             node.x,
             node.y,
             node.x1,
-            node.y1,
+            node.y1
           );
 
           const color = clr();
@@ -101,7 +98,7 @@ canvasSketch(() => {
             chroma(color)
               .brighten(2)
               // .alpha(0)
-              .css(),
+              .css()
           );
 
           context.beginPath();
@@ -110,9 +107,7 @@ canvasSketch(() => {
           context.fillStyle = gradient;
           context.fill();
 
-          context.fillStyle = chroma(color)
-            .brighten(1)
-            .css();
+          context.fillStyle = chroma(color).brighten(1).css();
           linspace(2500).forEach(() => {
             const [cx, cy] = Random.insideCircle(r);
             context.save();
@@ -129,7 +124,10 @@ canvasSketch(() => {
 function quadtreeToNodes(pts, width, height) {
   const quadtree = d3
     .quadtree()
-    .extent([[0, 0], [width, height]])
+    .extent([
+      [0, 0],
+      [width, height],
+    ])
     .addAll(pts);
 
   const nodes = [];
