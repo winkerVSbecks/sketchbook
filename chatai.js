@@ -14,7 +14,7 @@ const settings = {
 };
 
 window.fxHash = {
-  size: 3,
+  size: Random.pick([1, 2, 3]),
   monoChrome: Random.chance(),
 };
 
