@@ -12,7 +12,7 @@ const settings = {
 const config = {
   balls: [0.5, 0.25, 0.125, 0.0625],
   colors: createColors(),
-  t: 5,
+  t: 4,
   spacing: 40,
 };
 
@@ -40,14 +40,14 @@ const sketch = ({ width, height, canvas }) => {
   return ({ context, width, height, time, playhead }) => {
     // clear
     context.clearRect(0, 0, width, height);
-    context.fillStyle = config.colors.bg[1];
+    context.fillStyle = '#fff';
     context.fillRect(0, 0, width, height);
 
     const pingPongPlayhead = lerpFrames([-1, 0, 1], playhead);
 
     state.balls.forEach((ball, idx, balls) => {
       if (idx > 0) {
-        step(ball, balls[idx - 1], pingPongPlayhead);
+        step(ball, pingPongPlayhead);
       }
     });
 
@@ -117,7 +117,7 @@ function makeBall(size, width, height, parent) {
   };
 }
 
-function step(ball, parent, playhead) {
+function step(ball, playhead) {
   const { posA, posB } = ball;
 
   if (playhead < 0) {
@@ -132,9 +132,6 @@ function step(ball, parent, playhead) {
 
 function drawBall(context, ball, parent, time, playhead) {
   const { r, x, y, patternShift, rippleA, rippleB } = ball;
-
-  // Animate ripple
-  ball.patternShift = lerp(0, 40, time % 1);
 
   context.strokeStyle = config.colors.ink[Math.floor(r / config.spacing)];
   context.lineWidth = config.t;
@@ -163,6 +160,9 @@ function drawBall(context, ball, parent, time, playhead) {
 
   // Clip to ball shape
   context.clip();
+
+  // Animate ripple
+  ball.patternShift = lerp(0, 40, time % 1);
 
   // Draw ripples
   for (let r1 = 0; r1 <= r; r1 += config.spacing) {
@@ -196,18 +196,17 @@ function createColors() {
     maxSaturationLight: [1, 1],
   };
 
-  const colorSystem = generateRandomColorRamp(colorConfig);
+  const inkColorSystem = generateRandomColorRamp(colorConfig);
 
-  const darkColorSystem = generateRandomColorRamp({
+  const bgColorSystem = generateRandomColorRamp({
     ...colorConfig,
     total: 3,
     hueCycle: 1,
-    maxSaturationLight: [1, 0.5],
   });
 
   const hsl = (c) => `hsla(${c[0]}, ${c[1] * 100}%, ${c[2] * 100}%, 1)`;
-  const bgColors = darkColorSystem.light.map(hsl);
-  const inkColors = colorSystem.light.map(hsl);
+  const bgColors = bgColorSystem.light.map(hsl);
+  const inkColors = inkColorSystem.dark.map(hsl);
 
   return { bg: [bgColors[0], bgColors[2]], ink: inkColors };
 }
