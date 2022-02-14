@@ -126,6 +126,21 @@ const figma = [
   '#fff3d4',
 ];
 
+const kaleidoscopic = [
+  '#064ED6',
+  '#3067EB',
+  '#F5818C',
+  '#111A38',
+  '#E1A9F5',
+  '#E9EEF5',
+  '#F45C67',
+  '#F5D34D',
+  '#D4DAE4',
+  '#14CBDF',
+  '#F4BCD6',
+  '#F58EED',
+];
+
 function clrs(minContrast = 3) {
   const background = Random.pick(paperColors);
 
