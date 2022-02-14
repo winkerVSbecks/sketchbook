@@ -116,8 +116,6 @@ function areaToNode({ x, y, width, height }) {
     width,
     height,
     color: Random.pick(config.colors),
-    direction: Random.pick([0, 1]),
-    movement: Random.pick(['shift', 'expand']),
   };
 }
 
@@ -125,7 +123,10 @@ function assignBehaviour(node, globalBounds) {
   const { initial } = node;
 
   const direction = Random.pick(['x', 'y']);
-  const movement = Random.pick(['shift', 'expand']);
+  const movement = Random.weightedSet([
+    { value: 'expand', weight: 200 },
+    { value: 'shift', weight: 50 },
+  ]); //Random.pick(['shift', 'expand']);
 
   const { x, y, x1, y1 } = initial;
   node.x = x;
