@@ -1,20 +1,22 @@
 const canvasSketch = require('canvas-sketch');
-const { lerp } = require('canvas-sketch-util/math');
+const { lerp, mapRange } = require('canvas-sketch-util/math');
 const Random = require('canvas-sketch-util/random');
 const Quadtree = require('@timohausmann/quadtree-js');
+const eases = require('eases');
 
 const settings = {
-  // dimensions: [1080, 1080],
-  dimensions: [512 * 4, 512 * 3],
+  dimensions: [1080 * 4, 1080 * 3],
+  scaleToFit: true,
+  scaleToFitPadding: 20,
   animate: true,
   duration: 4,
 };
 
 const config = {
-  margin: 100,
-  gap: 0,
-  pointCount: Random.pick([100, 200, 300]), //Random.rangeFloor(100, 300),
-  maxQtObjects: 50,
+  margin: 0.02,
+  gap: Random.pick([20, 0]),
+  pointCount: Random.pick([100, 200, 300, 500]),
+  maxQtObjects: Random.pick([20, 50]),
   maxQtLevels: 4,
   bg: '#242632',
   colors: [
@@ -31,26 +33,36 @@ const config = {
     '#F4BCD6',
     '#F58EED',
   ],
-  // bg: '#000000',
-  // colors: ['#0C29FF', '#FFBC03', '#FF91A5', '#FFFFFF', '#33B67A', '#FD3C2D'],
   shiftEnabled: Random.chance(),
+  pause: 0.1,
+  showGrid: false,
 };
 
 const state = {};
 
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'd') {
+    config.showGrid = !config.showGrid;
+    console.log(config);
+  }
+});
+
 const sketch = ({ width, height }) => {
+  let margin = config.margin * Math.min(width, height);
+  let gap = config.gap;
+
   state.pts = new Array(config.pointCount).fill(null).map(() => ({
-    x: Random.rangeFloor(config.margin, width - config.margin),
-    y: Random.rangeFloor(config.margin, height - config.margin),
+    x: Random.rangeFloor(margin + gap, width - margin - gap),
+    y: Random.rangeFloor(margin + gap, height - margin - gap),
     width: 4,
     height: 4,
   }));
 
   state.grid = createQtGrid({
-    width: width - config.margin * 2,
-    height: height - config.margin * 2,
+    width: width - margin * 2 - gap,
+    height: height - margin * 2 - gap,
     points: state.pts,
-    gap: config.gap,
+    gap: gap,
     maxQtObjects: config.maxQtObjects,
     maxQtLevels: config.maxQtLevels,
   });
@@ -61,29 +73,45 @@ const sketch = ({ width, height }) => {
     begin({ width, height }) {
       state.nodes.forEach((node) =>
         assignBehaviour(node, {
-          xMin: 0,
-          xMax: width - config.margin * 2,
-          yMin: 0,
-          yMax: height - config.margin * 2,
+          xMin: gap,
+          xMax: width - margin * 2 - gap * 2,
+          yMin: gap,
+          yMax: height - margin * 2 - gap * 2,
         })
       );
     },
     render({ context, width, height, playhead }) {
+      margin = config.margin * Math.min(width, height);
+
       context.clearRect(0, 0, width, height);
-      context.fillStyle = '#fff'; //config.bg;
+      context.fillStyle = '#fff';
       context.fillRect(0, 0, width, height);
+
+      context.translate(gap / 2, gap / 2);
 
       context.fillStyle = config.bg;
       context.fillRect(
-        config.margin,
-        config.margin,
-        width - config.margin * 2,
-        height - config.margin * 2
+        margin - gap,
+        margin - gap,
+        width - margin * 2 + gap,
+        height - margin * 2 + gap
       );
 
-      context.translate(config.margin, config.margin);
+      context.translate(margin, margin);
 
-      const pingPongPlayhead = Math.sin(Math.PI * playhead);
+      let pingPongPlayhead = 0;
+
+      if (playhead < config.pause) {
+        pingPongPlayhead = 0;
+      } else if (playhead > config.pause && playhead <= 0.5) {
+        const t = mapRange(playhead, config.pause, 0.5, 0, 1);
+        pingPongPlayhead = eases.expoInOut(t);
+      } else if (playhead > 0.5 && playhead <= 0.5 + config.pause) {
+        pingPongPlayhead = 1;
+      } else if (playhead > 0.5 + config.pause) {
+        const t = mapRange(playhead, 0.5 + config.pause, 1, 1, 0);
+        pingPongPlayhead = eases.expoInOut(t);
+      }
 
       state.nodes.forEach((node) => {
         node.tick(pingPongPlayhead);
@@ -93,9 +121,11 @@ const sketch = ({ width, height }) => {
         drawNode(context, node);
       });
 
-      // state.nodes.forEach((node) => {
-      //   debugNode(context, node);
-      // });
+      if (config.showGrid) {
+        state.nodes.forEach((node) => {
+          debugNode(context, node);
+        });
+      }
     },
   };
 };
@@ -126,7 +156,7 @@ function assignBehaviour(node, globalBounds) {
   const movement = Random.weightedSet([
     { value: 'expand', weight: 200 },
     { value: 'shift', weight: 50 },
-  ]); //Random.pick(['shift', 'expand']);
+  ]);
 
   const { x, y, x1, y1 } = initial;
   node.x = x;
