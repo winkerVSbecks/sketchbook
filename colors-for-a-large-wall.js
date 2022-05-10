@@ -14,7 +14,10 @@ const settings = {
 
 const config = {
   margin: 0.02,
-  gap: Random.pick([20, 0]),
+  gap: Random.weightedSet([
+    { value: 20, weight: 10 },
+    { value: 0, weight: 100 },
+  ]),
   pointCount: Random.pick([100, 200, 300, 500]),
   maxQtObjects: Random.pick([20, 50]),
   maxQtLevels: 4,
