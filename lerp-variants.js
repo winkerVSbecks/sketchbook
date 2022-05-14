@@ -115,111 +115,57 @@ function makeBall({ type, start: _start, end: _end, random = false }) {
       pos[1] = start[1];
     },
     render(props) {
-      movementTypes[type](props, [start, end], pos, spd);
+      const { context } = props;
+      pos = movementTypes[type](props, [start, end], pos, spd);
+
+      const lineWidth = 4;
+      const radius = 20;
+
+      // start
+      circle(context, start[0], start[1], radius, config.colors.fg, lineWidth);
+      // end
+      circle(context, end[0], end[1], radius, config.colors.fg, lineWidth);
+      // inner
+      circle(context, pos[0], pos[1], radius / 2, config.colors.fg);
     },
   };
 }
 
 const movementTypes = {
-  lerp: drawLerp,
-  spring: drawSpring,
-  damp: drawDamp,
-  slerp: drawSlerp,
+  lerp: ({ playhead }, [start, end]) => {
+    return [lerp(start[0], end[0], playhead), lerp(start[1], end[1], playhead)];
+  },
+  damp: ({ deltaTime }, [start, end], pos) => {
+    return [
+      damp(pos[0], end[0], config.lambda, deltaTime),
+      damp(pos[1], end[1], config.lambda, deltaTime),
+    ];
+  },
+  spring: ({ deltaTime }, [start, end], pos, spd) => {
+    spd[0] = lerp(
+      spd[0],
+      (end[0] - pos[0]) * config.spring.stiffness,
+      config.spring.damping
+    );
+    spd[1] = lerp(
+      spd[1],
+      (end[1] - pos[1]) * config.spring.stiffness,
+      config.spring.damping
+    );
+
+    return [pos[0] + spd[0], pos[1] + spd[1]];
+  },
+  slerp: ({ playhead }, [start, end]) => {
+    const angle = Math.acos(dot(start, end));
+
+    const factor1 = Math.sin(angle * (1 - playhead)) / Math.sin(angle);
+    const factor2 = Math.sin(angle * playhead) / Math.sin(angle);
+
+    return [
+      start[0] * factor1 + end[0] * factor2,
+      start[1] * factor1 + end[1] * factor2,
+    ];
+  },
 };
-
-function drawLerp({ context, playhead }, [start, end]) {
-  // Chosoe size of circle & stroke
-  const lineWidth = 4;
-  const radius = 20;
-
-  // Draw the start and end point
-  circle(context, start[0], start[1], radius, config.colors.fg, lineWidth);
-  circle(context, end[0], end[1], radius, config.colors.fg, lineWidth);
-
-  // Choose a 't' value between 0..1, in this case the loop playhead
-  const t = playhead;
-
-  // Interpolate the x & y from start to end, using t
-  const point = [lerp(start[0], end[0], t), lerp(start[1], end[1], t)];
-
-  // And draw it
-  circle(context, point[0], point[1], radius / 2, config.colors.fg);
-}
-
-// https://www.gamedeveloper.com/programming/improved-lerp-smoothing-
-// https://www.rorydriscoll.com/2016/03/07/frame-rate-independent-damping-using-lerp/
-// https://github.com/mattdesl/blog-posts/blob/master/lerp/03-spring-toward-target.js
-// Or use linear interpolation to spring toward a moving target.
-// Each frame, interpolate from the current value to the target value with a small t parameter, such as 0.05.
-// It’s like saying: walk 5% toward the target each frame.
-function drawDamp({ context, deltaTime }, [start, end], pos) {
-  // Choose size of circle & stroke
-  const lineWidth = 4;
-  const radius = 20;
-
-  // Draw the start and end point
-  circle(context, start[0], start[1], radius, config.colors.fg, lineWidth);
-  circle(context, end[0], end[1], radius, config.colors.fg, lineWidth);
-
-  // Interpolate the x & y from start to end, using deltaTime
-  pos[0] = damp(pos[0], end[0], config.lambda, deltaTime);
-  pos[1] = damp(pos[1], end[1], config.lambda, deltaTime);
-
-  circle(context, pos[0], pos[1], radius / 2, config.colors.fg);
-}
-
-function drawSpring({ context, deltaTime }, [start, end], pos, spd) {
-  const lineWidth = 4;
-  const radius = 20;
-
-  // Draw the start and end point
-  circle(context, start[0], start[1], radius, config.colors.fg, lineWidth);
-  circle(context, end[0], end[1], radius, config.colors.fg, lineWidth);
-
-  // Interpolate toward the target point at this rate
-  spd[0] = lerp(
-    spd[0],
-    (end[0] - pos[0]) * config.spring.stiffness,
-    config.spring.damping // deltaTime *
-  );
-  pos[0] += spd[0];
-  spd[1] = lerp(
-    spd[1],
-    (end[1] - pos[1]) * config.spring.stiffness,
-    config.spring.damping // deltaTime *
-  );
-  pos[1] += spd[1];
-
-  circle(context, pos[0], pos[1], radius / 2, config.colors.fg);
-}
-
-// https://observablehq.com/@spattana/slerp-spherical-linear-interpolation
-// https://en.wikipedia.org/wiki/Slerp
-function drawSlerp({ context, playhead }, [start, end]) {
-  // Chosoe size of circle & stroke
-  const lineWidth = 4;
-  const radius = 20;
-
-  // Draw the start and end point
-  circle(context, start[0], start[1], radius, config.colors.fg, lineWidth);
-  circle(context, end[0], end[1], radius, config.colors.fg, lineWidth);
-
-  const point = slerp(start, end, playhead);
-
-  // And draw it
-  circle(context, point[0], point[1], radius / 2, config.colors.fg);
-}
-
-const dot = ([ax, ay], [bx, by]) =>
-  (ax * bx + ay * by) / (Math.hypot(ax, ay) * Math.hypot(bx, by));
-
-function slerp(p0, p1, t) {
-  const angle = Math.acos(dot(p0, p1));
-
-  const factor1 = Math.sin(angle * (1 - t)) / Math.sin(angle);
-  const factor2 = Math.sin(angle * t) / Math.sin(angle);
-
-  return [p0[0] * factor1 + p1[0] * factor2, p0[1] * factor1 + p1[1] * factor2];
-}
 
 canvasSketch(sketch, settings);

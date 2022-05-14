@@ -12,11 +12,44 @@ const rect = (context, x, y, width, height, color) => {
   context.fillRect(x, y, width, height);
 };
 
+const dot = ([ax, ay], [bx, by]) =>
+  (ax * bx + ay * by) / (Math.hypot(ax, ay) * Math.hypot(bx, by));
+
 const movementTypes = {
-  lerp: drawLerp,
-  spring: drawSpring,
-  damp: drawDamp,
-  slerp: drawSlerp,
+  lerp: ({ playhead }, [start, end]) => {
+    return [lerp(start[0], end[0], playhead), lerp(start[1], end[1], playhead)];
+  },
+  damp: ({ deltaTime }, [start, end], pos) => {
+    return [
+      damp(pos[0], end[0], config.lambda, deltaTime),
+      damp(pos[1], end[1], config.lambda, deltaTime),
+    ];
+  },
+  spring: ({ deltaTime }, [start, end], pos, spd) => {
+    spd[0] = lerp(
+      spd[0],
+      (end[0] - pos[0]) * config.spring.stiffness,
+      config.spring.damping
+    );
+    spd[1] = lerp(
+      spd[1],
+      (end[1] - pos[1]) * config.spring.stiffness,
+      config.spring.damping
+    );
+
+    return [pos[0] + spd[0], pos[1] + spd[1]];
+  },
+  slerp: ({ playhead }, [start, end]) => {
+    const angle = Math.acos(dot(start, end));
+
+    const factor1 = Math.sin(angle * (1 - playhead)) / Math.sin(angle);
+    const factor2 = Math.sin(angle * playhead) / Math.sin(angle);
+
+    return [
+      start[0] * factor1 + end[0] * factor2,
+      start[1] * factor1 + end[1] * factor2,
+    ];
+  },
 };
 
 const config = {
@@ -37,7 +70,7 @@ const config = {
     h: 40,
   },
   span: 1,
-  movement: 'damp',
+  movement: 'lerp',
 };
 
 const sketch = () => {
@@ -128,48 +161,6 @@ function moveRect(rect, props) {
 
   rect.x = x;
   rect.y = y;
-}
-
-function drawLerp({ playhead }, [start, end]) {
-  return [lerp(start[0], end[0], playhead), lerp(start[1], end[1], playhead)];
-}
-
-function drawDamp({ deltaTime }, [start, end], pos) {
-  return [
-    damp(pos[0], end[0], config.lambda, deltaTime),
-    damp(pos[1], end[1], config.lambda, deltaTime),
-  ];
-}
-
-function drawSpring({ deltaTime }, [start, end], pos, spd) {
-  spd[0] = lerp(
-    spd[0],
-    (end[0] - pos[0]) * config.spring.stiffness,
-    config.spring.damping
-  );
-  spd[1] = lerp(
-    spd[1],
-    (end[1] - pos[1]) * config.spring.stiffness,
-    config.spring.damping
-  );
-
-  return [pos[0] + spd[0], pos[1] + spd[1]];
-}
-
-function drawSlerp({ playhead }, [start, end]) {
-  return slerp(start, end, playhead);
-}
-
-const dot = ([ax, ay], [bx, by]) =>
-  (ax * bx + ay * by) / (Math.hypot(ax, ay) * Math.hypot(bx, by));
-
-function slerp(p0, p1, t) {
-  const angle = Math.acos(dot(p0, p1));
-
-  const factor1 = Math.sin(angle * (1 - t)) / Math.sin(angle);
-  const factor2 = Math.sin(angle * t) / Math.sin(angle);
-
-  return [p0[0] * factor1 + p1[0] * factor2, p0[1] * factor1 + p1[1] * factor2];
 }
 
 canvasSketch(sketch, settings);
