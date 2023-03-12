@@ -9,8 +9,9 @@ const { Poline, positionFunctions } = require('poline/dist/index.cjs');
 const settings = {
   dimensions: [800, 600],
   animate: true,
-  duration: 6,
+  duration: 20,
   scaleToView: true,
+  loop: false,
 };
 
 const poline = new Poline({
@@ -28,8 +29,6 @@ colors.forEach((color) => {
 const threads = {
   warp: colors.slice(0, 7),
   weft: colors.slice(7),
-  // weft: colors.slice(0, 7),
-  // warp: colors.slice(7),
 };
 
 const getThread = (type, index) => {
@@ -46,14 +45,9 @@ const sketch = () => {
     new Array(patternLength).fill(0).map(() => Random.pick([0, 1])), //[1, 0, 1, 0, 1, 0],
   ];
   console.table(pattern);
-  const threadSize = 10;
+  const threadSize = 20;
 
-  const createWeave = ({ width, height, playhead }) => {
-    const weftCount = width / threadSize;
-    const warpCount = height / threadSize;
-
-    const limit = Math.ceil(warpCount * playhead);
-
+  const createWeave = ({ weftCount, warpCount, limit }) => {
     blocks = [];
 
     for (let y = 0; y < limit; y++) {
@@ -69,7 +63,7 @@ const sketch = () => {
           blocks.push({
             x: (x + i) * threadSize,
             y: y * threadSize,
-            color: getThread(state, index),
+            color: state === 'weft' ? getThread(state, index) : 'transparent',
           });
         }
       }
@@ -84,20 +78,40 @@ const sketch = () => {
     return index;
   }
 
-  const drawFabric = (context) => {
+  const drawWeft = (context) => {
     blocks.forEach(({ x, y, color }) => {
       context.fillStyle = color;
       context.fillRect(x, y, threadSize, threadSize);
     });
   };
 
+  const drawWarp = ({ context, width, x, y }) => {
+    const index = getIndex(y, 'warp');
+    context.fillStyle = getThread('warp', index);
+    context.fillRect(0, y * threadSize, x * width, threadSize);
+  };
+
   return {
-    begin({ width, height }) {
+    begin({ context, width, height }) {
       // createWeave({ width, height });
+      context.clearRect(0, 0, width, height);
+      context.fillStyle = '#fff';
+      context.fillRect(0, 0, width, height);
     },
     render({ context, width, height, playhead }) {
-      createWeave({ width, height, playhead });
-      drawFabric(context);
+      const weftCount = width / threadSize;
+      const warpCount = height / threadSize;
+
+      const limit = Math.ceil(warpCount * playhead);
+
+      createWeave({ weftCount, warpCount, limit, playhead });
+      drawWarp({
+        context,
+        width,
+        x: (warpCount * playhead) % 1,
+        y: limit - 1,
+      });
+      drawWeft(context);
     },
   };
 };
