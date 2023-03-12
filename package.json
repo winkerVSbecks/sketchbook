@@ -20,7 +20,7 @@
   "license": "MIT",
   "dependencies": {
     "@anvaka/streamlines": "^1.2.0",
-    "@ffmpeg-installer/ffmpeg": "^1.0.20",
+    "@ffmpeg-installer/ffmpeg": "^1.1.0",
     "@lnjs/core": "^0.5.0",
     "@timohausmann/quadtree-js": "^1.2.5",
     "animejs": "^3.0.1",
@@ -53,6 +53,7 @@
     "point-util": "0.0.0",
     "poisson-disc-sampler": "^1.1.0",
     "poisson-disk-sampling": "^2.2.2",
+    "poline": "^0.6.0",
     "polygon-clipping": "^0.15.2",
     "ramda": "^0.25.0",
     "rbush": "^3.0.1",

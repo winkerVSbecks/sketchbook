@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>Color Palttes</title>
+  <style>
+    :root {
+      font-family: sans-serif;
+    }
+    main {
+      max-width: 32rem;
+    }
+    h2 {
+      margin-bottom: 0.1em;
+    }
+    ul,
+    li {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    ul {
+      display: flex;
+      border: 2px solid #202125;
+    }
+
+    li {
+      flex: 1 1 auto;
+      height: 1.5rem;
+      background: var(--color);
+    }
+  </style>
+</head>
+
+<body>
+  <main data-colors></main>
+  <script type="module">
+    import { colorPalettes } from '/palettes.esm.js';
+
+    const $wrap = document.querySelector('[data-colors]');
+
+    colorPalettes.palettes.forEach(palette => {
+      const $pal = document.createElement('article');
+      const $h2 = document.createElement('h2');
+      const $ul = document.createElement('ul');
+      $h2.textContent = palette.name;
+      $pal.appendChild($h2);
+
+      palette.colors.forEach(color => {
+        const $li = document.createElement('li');
+        $li.style.setProperty('--color', color);
+        $ul.appendChild($li);
+      });
+
+      $pal.appendChild($ul);
+
+      $wrap.appendChild($pal);
+    });
+
+    console.log(colorPalettes.random());
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,104 @@
+- name: Some
+  colors:
+    - '#3333ff'
+    - '#fc7f95'
+    - '#fbfc6e'
+    - '#55f9fc'
+    - '#fefefc'
+
+- name: From David
+  colors:
+    - ['red', 'white', '#202123']
+    - ['#eac328', '#CE6D54', '#354046']
+    - ['#b03b5f', '#e1e6eb', '#07080b']
+    - ['#E39E84', '#73BEDE', '#FDF8E7']
+    - ['#fff', '#E17887', '#90C6E6']
+    - ['#DF3F1F', '#fff', '#A61C54']
+    - ['turquoise', 'hotpink', '#212121']
+    - ['gold', 'darkgray', 'purple']
+    - ['#2487c6', '#f7f7f7', '#202124']
+    - ['#fff', '#202124', '#fdd']
+    - ['#ffd919', '#262104', '#fffbe6']
+    - ['#ff4f19', '#15084d', '#5ce6e6']
+    - ['#ee726b', '#ffc5c7', '#fef9c6']
+    - ['#0a1966', '#ffef0d', '#fafafa']
+    - ['#f9f9f9', '#ff0000', '#0000ff']
+    - ['#226699', '#dd2e44', '#ffcc4d']
+    - ['#021d34', '#228fca', '#dcedf0']
+
+- name: Pigments
+  colors:
+    - ['#5FBD7D', '#1172C8']
+    - ['#335136', '#99c478']
+    - ['#4d4277', '#ee1a5c']
+    - ['#3655F9', '#FFE9D3']
+    - ['#7B5CB1', '#10DEB5']
+    - ['#DC5757', '#FFA987']
+    - ['#FFCA3E', '#F4DAB5']
+    - ['#FE5F49', '#F4BF1B']
+    - ['#13C0EF', '#FFC327']
+    - ['#537881', '#E6C79C']
+    - ['#263ED7', '#CEBEAC']
+    - ['#EC1F5A', '#6A2760']
+
+- name: Ellsworth Kelly
+  colors:
+    - '#f13401'
+    - '#0769ce'
+    - '#f1d93c'
+    - '#11804b'
+
+- name: Warm
+  colors:
+    - '#7c203a'
+    - '#f85959'
+    - '#ff9f68'
+    - '#feff89'
+    - '#f8b195'
+    - '#f67280'
+    - '#c06c84'
+    - '#355c7d'
+    - '#6c567b'
+
+- name: Bilbao
+  colors:
+    - '#FAD5DC'
+    - '#05323D'
+    - '#F6C4B1'
+    - '#D4DB6E'
+    - '#EB7574'
+    - '#55B867'
+    - '#D7C84A'
+    - '#33B2A2'
+    - '#CD202F'
+
+- name: Figma
+  colors:
+    - '#201c1d'
+    - '#5f6ce0'
+    - '#ffad72'
+    - '#bafc9d'
+    - '#bf8dff'
+    - '#2a1f38'
+    - '#ffb06b'
+    - '#382718'
+    - '#fc9de7'
+    - '#382333'
+    - '#d4ffff'
+    - '#ffffff'
+    - '#fff3d4'
+
+- name: Kaleidoscopic
+  colors:
+    - '#064ED6'
+    - '#3067EB'
+    - '#F5818C'
+    - '#111A38'
+    - '#E1A9F5'
+    - '#E9EEF5'
+    - '#F45C67'
+    - '#F5D34D'
+    - '#D4DAE4'
+    - '#14CBDF'
+    - '#F4BCD6'
+    - '#F58EED'
