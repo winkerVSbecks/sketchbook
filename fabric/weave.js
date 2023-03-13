@@ -26,6 +26,13 @@ colors.forEach((color) => {
   console.log('%c  ', `background: ${color};`);
 });
 
+/**
+ * warp ↕️↕️↕️↕️↕️↕️↕️↕️↕️↕️↕️↕️↕️↕️↕️↕️↕️↕️
+ * weft ↔️↔️↔️↔️↔️↔️↔️↔️↔️↔️↔️↔️↔️↔️↔️↔️↔️↔️
+ *      ↕️↕️↕️↕️↕️↕️↕️↕️↕️↕️↕️↕️↕️↕️↕️↕️↕️↕️
+ *      ↔️↔️↔️↔️↔️↔️↔️↔️↔️↔️↔️↔️↔️↔️↔️↔️↔️↔️
+ *      ↕️↕️↕️↕️↕️↕️↕️↕️↕️↕️↕️↕️↕️↕️↕️↕️↕️↕️
+ */
 const threads = {
   warp: colors.slice(0, 7),
   weft: colors.slice(7),
@@ -38,7 +45,8 @@ const getThread = (type, index) => {
 };
 
 const sketch = () => {
-  let blocks = [];
+  let blocks = { warpUp: [], warpDown: [], weft: [] };
+
   const patternLength = Random.rangeFloor(2, 10);
   const pattern = [
     new Array(patternLength).fill(0).map(() => Random.pick([0, 1])), //[0, 1, 1, 1, 0, 1],
@@ -48,22 +56,22 @@ const sketch = () => {
   const threadSize = 20;
 
   const createWeave = ({ weftCount, warpCount, limit }) => {
-    blocks = [];
+    blocks = { warpUp: [], warpDown: [], weft: [] };
 
-    for (let y = 0; y < limit; y++) {
+    for (let y = 0; y < weftCount /* limit */; y++) {
       const p = pattern[y % pattern.length];
       const step = p.length;
 
-      for (let x = 0; x < weftCount; x += step) {
+      for (let x = 0; x < warpCount; x += step) {
         for (let i = 0; i < step; i++) {
           const state = p[i] ? 'warp' : 'weft';
           const rawIndex = p[i] ? y : x + i;
           const index = getIndex(rawIndex, threads[state]);
 
-          blocks.push({
+          blocks[p[i] ? 'warpUp' : 'warpDown'].push({
             x: (x + i) * threadSize,
             y: y * threadSize,
-            color: state === 'weft' ? getThread(state, index) : 'transparent',
+            color: getThread('warp', getIndex(x + i, threads.warp)),
           });
         }
       }
@@ -78,40 +86,46 @@ const sketch = () => {
     return index;
   }
 
-  const drawWeft = (context) => {
+  const drawWarp = ({ context, blocks }) => {
     blocks.forEach(({ x, y, color }) => {
       context.fillStyle = color;
       context.fillRect(x, y, threadSize, threadSize);
     });
   };
 
-  const drawWarp = ({ context, width, x, y }) => {
-    const index = getIndex(y, 'warp');
-    context.fillStyle = getThread('warp', index);
-    context.fillRect(0, y * threadSize, x * width, threadSize);
+  const drawWeft = ({ context, width, x, y }) => {
+    for (let i = 0; i < y; i++) {
+      const index = getIndex(i, 'weft');
+      context.fillStyle = getThread('weft', index);
+      const w = i === y - 1 ? x * width : width;
+      context.fillRect(0, i * threadSize, w, threadSize);
+    }
   };
 
   return {
     begin({ context, width, height }) {
       // createWeave({ width, height });
+    },
+    render({ context, width, height, playhead }) {
       context.clearRect(0, 0, width, height);
       context.fillStyle = '#fff';
       context.fillRect(0, 0, width, height);
-    },
-    render({ context, width, height, playhead }) {
-      const weftCount = width / threadSize;
-      const warpCount = height / threadSize;
+
+      const warpCount = width / threadSize;
+      const weftCount = height / threadSize;
 
       const limit = Math.ceil(warpCount * playhead);
+      const weftLimit = Math.ceil(weftCount * playhead);
 
       createWeave({ weftCount, warpCount, limit, playhead });
-      drawWarp({
+      drawWarp({ context, blocks: blocks.warpDown });
+      drawWeft({
         context,
         width,
         x: (warpCount * playhead) % 1,
-        y: limit - 1,
+        y: limit,
       });
-      drawWeft(context);
+      drawWarp({ context, blocks: blocks.warpUp });
     },
   };
 };
