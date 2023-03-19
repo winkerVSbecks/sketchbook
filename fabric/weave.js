@@ -17,11 +17,11 @@ const settings = {
 
 const config = {
   shadow: true,
-  gap: 0,
+  gap: 0, // gap logic is broken
   looseEndSize: 4,
   threadSize: 5 * 2,
   shadowSize: 0.5 * 2,
-  animateWeft: true,
+  animateWeft: false,
   animateWarp: false,
 };
 
@@ -98,21 +98,22 @@ const drawWarp = ({ context, blocks, limit, warpCount }) => {
   blocks.forEach(({ x, y, color }) => {
     if (x >= config.looseEndSize && x < warpCount - config.looseEndSize) {
       // shadow
-      if (
-        config.shadow &&
-        y >= config.looseEndSize &&
-        y < limit - config.looseEndSize
-      ) {
-        context.fillStyle = shadowColor;
-        context.fillRect(
-          x * config.threadSize - config.shadowSize,
-          y * config.threadSize,
-          config.threadSize + 2 * config.shadowSize,
-          config.threadSize
-        );
-      }
+      // if (
+      //   config.shadow &&
+      //   y >= config.looseEndSize &&
+      //   y < limit - config.looseEndSize
+      // ) {
+      //   context.fillStyle = shadowColor;
+      //   context.fillRect(
+      //     x * config.threadSize - config.shadowSize,
+      //     y * config.threadSize,
+      //     config.threadSize + 2 * config.shadowSize,
+      //     config.threadSize
+      //   );
+      // }
 
       context.fillStyle = color;
+      // prettier-ignore
       context.fillRect(
         x * config.threadSize,
         y * config.threadSize,
@@ -124,35 +125,43 @@ const drawWarp = ({ context, blocks, limit, warpCount }) => {
 };
 
 // weft ↔️↔️↔️
-const drawWeft = ({ context, width, x, y, weftCount }) => {
-  for (let i = config.looseEndSize; i < y - config.looseEndSize; i++) {
-    const index = getIndex(i, 'weft');
-    const w = i === y - 1 ? x * width : width;
-    const color = getThread('weft', index);
+const drawWeft = ({
+  context,
+  width,
+  x: xLimit,
+  y: yLimit,
+  weftCount,
+  warpCount,
+}) => {
+  for (let y = config.looseEndSize; y < yLimit - config.looseEndSize; y++) {
+    for (let x = 0; x < xLimit; x++) {
+      const index = getIndex(y, 'weft');
+      const color = getThread('weft', index);
 
-    if (
-      config.shadow &&
-      x >= config.looseEndSize &&
-      x < weftCount - config.looseEndSize
-    ) {
-      // shadow
-      context.fillStyle = shadowColor;
-      context.fillRect(
-        0,
-        i * config.threadSize - config.shadowSize,
-        w,
-        config.threadSize + 2 * config.shadowSize
-      );
+      const X = x * config.threadSize;
+      const Y = y * config.threadSize;
+      const W = config.threadSize;
+      const H = config.threadSize;
+
+      if (
+        config.shadow &&
+        x >= config.looseEndSize &&
+        x < warpCount - config.looseEndSize
+      ) {
+        // shadow
+        context.fillStyle = shadowColor;
+        // prettier-ignore
+        context.fillRect(
+          X, Y - config.shadowSize,
+          W, H + 2 * config.shadowSize
+        );
+      }
+
+      // thread
+      context.fillStyle = color;
+      // prettier-ignore
+      context.fillRect(X - 1, Y, W + 1, H); // overlap to avoid gaps
     }
-
-    // thread
-    context.fillStyle = color;
-    context.fillRect(
-      0,
-      i * config.threadSize,
-      w,
-      config.threadSize - config.gap
-    );
   }
 };
 
@@ -163,13 +172,16 @@ const weave = ({ context, pattern, width, height, playhead, x, y }) => {
   const weftLimit = config.animateWeft
     ? Math.ceil(weftCount * playhead)
     : weftCount;
-  const warpLimit = Math.ceil(warpCount * playhead);
+  const warpLimit = config.animateWarp
+    ? Math.ceil(warpCount * playhead)
+    : warpCount;
 
   context.translate(x, y);
   weaveStep({ pattern, weftCount, warpCount, limit: weftLimit, playhead });
-  // ↕️↕️↕️
+  // ↕️↕️↕️ (underneath)
   drawWarp({
     context,
+    type: 'under',
     blocks: blocks.warpDown,
     limit: weftLimit,
     warpCount,
@@ -178,13 +190,15 @@ const weave = ({ context, pattern, width, height, playhead, x, y }) => {
   drawWeft({
     context,
     width,
-    x: (warpCount * playhead) % 1,
+    x: warpLimit, //(warpCount * playhead) % 1,
     y: weftLimit,
     weftCount,
+    warpCount,
   });
-  // ↕️↕️↕️
+  // ↕️↕️↕️ (on top)
   drawWarp({
     context,
+    type: 'over',
     blocks: blocks.warpUp,
     limit: weftLimit,
     warpCount,
