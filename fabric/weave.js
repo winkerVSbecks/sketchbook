@@ -39,7 +39,9 @@ colors.forEach((color) => {
 
 const shadowColor = chroma(colors.at(Math.floor(colors.length / 2)))
   .darken(1)
-  .hex();
+  .alpha(0.25)
+  .css();
+// .hex();
 
 /**
  * warp ↕️↕️↕️↕️↕️↕️↕️↕️↕️↕️↕️↕️↕️↕️↕️↕️↕️↕️
@@ -94,43 +96,38 @@ function getIndex(index, opts) {
 // warp ↕️↕️↕️
 const drawWarp = ({ context, blocks, limit, warpCount }) => {
   blocks.forEach(({ x, y, color }) => {
+    const X = x * config.threadSize;
+    const Y = y * config.threadSize;
+    const W = config.threadSize;
+    const H = config.threadSize;
+
     if (x >= config.looseEndSize && x < warpCount - config.looseEndSize) {
       // shadow
-      // if (
-      //   config.shadow &&
-      //   y >= config.looseEndSize &&
-      //   y < limit - config.looseEndSize
-      // ) {
-      //   context.fillStyle = shadowColor;
-      //   context.fillRect(
-      //     x * config.threadSize - config.shadowSize,
-      //     y * config.threadSize,
-      //     config.threadSize + 2 * config.shadowSize,
-      //     config.threadSize
-      //   );
-      // }
+      if (
+        config.shadow &&
+        y >= config.looseEndSize &&
+        y < limit - config.looseEndSize
+      ) {
+        context.fillStyle = shadowColor;
+        // prettier-ignore
+        context.fillRect(
+          X - config.shadowSize, Y,
+          W + 2 * config.shadowSize, H
+        );
+      }
 
       context.fillStyle = color;
       // prettier-ignore
       context.fillRect(
-        x * config.threadSize,
-        y * config.threadSize,
-        config.threadSize - config.gap,
-        config.threadSize
+        X, Y - 1,
+        W, H + 1
       );
     }
   });
 };
 
 // weft ↔️↔️↔️
-const drawWeft = ({
-  context,
-  width,
-  x: xLimit,
-  y: yLimit,
-  weftCount,
-  warpCount,
-}) => {
+const drawWeft = ({ context, x: xLimit, y: yLimit, weftCount, warpCount }) => {
   for (let y = config.looseEndSize; y < yLimit - config.looseEndSize; y++) {
     const limit = y === yLimit - config.looseEndSize - 1 ? xLimit : warpCount;
 
@@ -159,7 +156,6 @@ const drawWeft = ({
 
       // thread
       context.fillStyle = color;
-      // prettier-ignore
       context.fillRect(X - 1, Y, W + 1, H); // overlap to avoid gaps
     }
   }
@@ -189,7 +185,6 @@ const weave = ({ context, pattern, width, height, playhead, x, y }) => {
   // ↔️↔️↔️
   drawWeft({
     context,
-    width,
     x: config.animateNeedle
       ? Math.ceil(warpCount * ((weftCount * playhead) % 1))
       : warpCount,
