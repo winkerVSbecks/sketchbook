@@ -15,14 +15,16 @@ const settings = {
   loop: false,
 };
 
+const threadSize = 5 * 2;
 const config = {
   shadow: true,
   gap: 0, // gap logic is broken
-  looseEndSize: 4,
-  threadSize: 5 * 2,
+  looseEndSize: 0,
+  threadSize,
   shadowSize: 0.5 * 2,
   animateWeft: true,
   animateNeedle: true,
+  margin: threadSize * 4, //threadSize * 8,
 };
 
 const poline = new Poline({
@@ -216,16 +218,18 @@ const sketch = () => {
       context.fillStyle = '#fff';
       context.fillRect(0, 0, width, height);
 
-      const margin = config.threadSize * 8;
+      const trim = config.margin / 4;
+      context.fillStyle = '#111';
+      context.fillRect(trim, trim, width - 2 * trim, height - 2 * trim);
 
       weave({
         context,
         pattern,
-        width: width - margin * 2,
-        height: height - margin * 2,
+        width: width - config.margin * 2,
+        height: height - config.margin * 2,
         playhead,
-        x: margin,
-        y: margin,
+        x: config.margin,
+        y: config.margin,
       });
     },
   };
