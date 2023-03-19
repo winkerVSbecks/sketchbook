@@ -21,8 +21,8 @@ const config = {
   looseEndSize: 4,
   threadSize: 5 * 2,
   shadowSize: 0.5 * 2,
-  animateWeft: false,
-  animateWarp: false,
+  animateWeft: true,
+  animateNeedle: true,
 };
 
 const poline = new Poline({
@@ -65,9 +65,7 @@ const getThread = (type, index) => {
 const weaveStep = ({ pattern, weftCount, warpCount, limit }) => {
   blocks = { warpUp: [], warpDown: [], weft: [] };
 
-  const yLimit = config.animateWarp ? limit : weftCount;
-
-  for (let y = 0; y < yLimit; y++) {
+  for (let y = 0; y < weftCount; y++) {
     const p = pattern[y % pattern.length];
     const step = p.length;
 
@@ -134,7 +132,9 @@ const drawWeft = ({
   warpCount,
 }) => {
   for (let y = config.looseEndSize; y < yLimit - config.looseEndSize; y++) {
-    for (let x = 0; x < xLimit; x++) {
+    const limit = y === yLimit - config.looseEndSize - 1 ? xLimit : warpCount;
+
+    for (let x = 0; x < limit; x++) {
       const index = getIndex(y, 'weft');
       const color = getThread('weft', index);
 
@@ -172,7 +172,7 @@ const weave = ({ context, pattern, width, height, playhead, x, y }) => {
   const weftLimit = config.animateWeft
     ? Math.ceil(weftCount * playhead)
     : weftCount;
-  const warpLimit = config.animateWarp
+  const warpLimit = config.animateWeft
     ? Math.ceil(warpCount * playhead)
     : warpCount;
 
@@ -190,7 +190,9 @@ const weave = ({ context, pattern, width, height, playhead, x, y }) => {
   drawWeft({
     context,
     width,
-    x: warpLimit, //(warpCount * playhead) % 1,
+    x: config.animateNeedle
+      ? Math.ceil(warpCount * ((weftCount * playhead) % 1))
+      : warpCount,
     y: weftLimit,
     weftCount,
     warpCount,
