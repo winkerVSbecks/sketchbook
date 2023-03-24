@@ -12,7 +12,7 @@ const settings = {
   animate: true,
   duration: 5,
   scaleToView: true,
-  loop: false,
+  loop: true,
 };
 
 const threadSize = 5 * 2;
@@ -21,10 +21,10 @@ const config = {
   gap: 0, // gap logic is broken
   looseEndSize: 0,
   threadSize,
-  shadowSize: 0.5 * 2,
-  animateWeft: true,
-  animateNeedle: true,
   margin: threadSize * 4, //threadSize * 8,
+  shadowSize: 0.5 * 2,
+  animateWeft: false,
+  animateNeedle: false,
 };
 
 const poline = new Poline({
@@ -204,13 +204,17 @@ const weave = ({ context, pattern, width, height, playhead, x, y }) => {
   });
 };
 
-const sketch = () => {
+const sketch = ({ canvas }) => {
   const patternLength = Random.rangeFloor(2, 10);
   const pattern = new Array(Random.rangeFloor(2, 10))
     .fill(0)
     .map(() => new Array(patternLength).fill(0).map(() => Random.pick([0, 1])));
 
   console.table(pattern);
+
+  const [svgFilter, feTurbulence, feDisplacementMap] = createSVGFilter();
+  document.body.appendChild(svgFilter);
+  canvas.style.filter = 'url(#hand-drawn)';
 
   return {
     render({ context, width, height, playhead }) {
@@ -221,6 +225,15 @@ const sketch = () => {
       const trim = config.margin / 4;
       context.fillStyle = '#111';
       context.fillRect(trim, trim, width - 2 * trim, height - 2 * trim);
+
+      // feTurbulence.setAttribute(
+      //   'baseFrequency',
+      //   0.03 + 0.005 * Math.sin(playhead * Math.PI)
+      // );
+      feDisplacementMap.setAttribute(
+        'scale',
+        5 + 5 * Math.sin(playhead * Math.PI)
+      );
 
       weave({
         context,
@@ -236,3 +249,49 @@ const sketch = () => {
 };
 
 canvasSketch(sketch, settings);
+
+function createSVGFilter() {
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('width', '0');
+  svg.setAttribute('height', '0');
+  svg.style.position = 'absolute';
+  svg.style.zIndex = '-1';
+
+  const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+  svg.appendChild(defs);
+
+  const filter = document.createElementNS(
+    'http://www.w3.org/2000/svg',
+    'filter'
+  );
+  filter.setAttribute('id', 'hand-drawn');
+  filter.setAttribute('x', '0');
+  filter.setAttribute('y', '0');
+  filter.setAttribute('width', '100%');
+  filter.setAttribute('height', '100%');
+  defs.appendChild(filter);
+
+  const feTurbulence = document.createElementNS(
+    'http://www.w3.org/2000/svg',
+    'feTurbulence'
+  );
+  feTurbulence.setAttribute('type', 'fractalNoise');
+  feTurbulence.setAttribute('baseFrequency', '0.03');
+  feTurbulence.setAttribute('numOctaves', '0.5');
+  feTurbulence.setAttribute('result', 'noise');
+  feTurbulence.setAttribute('seed', Random.value());
+  filter.appendChild(feTurbulence);
+
+  const feDisplacementMap = document.createElementNS(
+    'http://www.w3.org/2000/svg',
+    'feDisplacementMap'
+  );
+  feDisplacementMap.setAttribute('in', 'SourceGraphic');
+  feDisplacementMap.setAttribute('in2', 'noise');
+  feDisplacementMap.setAttribute('scale', '5');
+  feDisplacementMap.setAttribute('xChannelSelector', 'R');
+  feDisplacementMap.setAttribute('yChannelSelector', 'G');
+  filter.appendChild(feDisplacementMap);
+
+  return [svg, feTurbulence, feDisplacementMap];
+}
