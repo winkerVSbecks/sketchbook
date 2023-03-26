@@ -73,11 +73,9 @@ const sketch = ({ canvas }) => {
 
   console.table(pattern);
 
-  if (config.flutter) {
-    const [svgFilter, feTurbulence, feDisplacementMap] = createSVGFilter();
-    document.body.appendChild(svgFilter);
-    canvas.style.filter = 'url(#hand-drawn)';
-  }
+  // const [svgFilter, feTurbulence, feDisplacementMap] = createSVGFilter();
+  // document.body.appendChild(svgFilter);
+  // canvas.style.filter = 'url(#hand-drawn)';
 
   return {
     render({ context, width, height, playhead }) {
@@ -89,16 +87,14 @@ const sketch = ({ canvas }) => {
       context.fillStyle = '#111';
       context.fillRect(trim, trim, width - 2 * trim, height - 2 * trim);
 
-      if (config.flutter) {
-        feTurbulence.setAttribute(
-          'baseFrequency',
-          0.03 + 0.005 * Math.sin(playhead * Math.PI)
-        );
-        // feDisplacementMap.setAttribute(
-        //   'scale',
-        //   5 + 5 * Math.sin(playhead * Math.PI)
-        // );
-      }
+      // feTurbulence.setAttribute(
+      //   'baseFrequency',
+      //   0.03 + 0.005 * Math.sin(playhead * Math.PI)
+      // );
+      // feDisplacementMap.setAttribute(
+      //   'scale',
+      //   5 + 5 * Math.sin(playhead * Math.PI)
+      // );
 
       weave({
         context,
@@ -109,6 +105,14 @@ const sketch = ({ canvas }) => {
         x: config.margin,
         y: config.margin,
       });
+
+      // // Add the darning pattern on top of the fabric
+      // drawDarningPattern({
+      //   context,
+      //   width: width - config.margin * 2,
+      //   height: height - config.margin * 2,
+      //   playhead,
+      // });
     },
   };
 };
@@ -129,24 +133,11 @@ const weaveStep = ({ pattern, weftCount, warpCount, limit }) => {
       for (let i = 0; i < step; i++) {
         const index = getIndex(x + i, threads.warp);
 
-        if (p[i]) {
-          blocks.warpUp.push({
-            x: x + i,
-            y: y,
-            color: getThread('warp', index),
-          });
-        } else {
-          blocks.warpDown.push({
-            x: x + i,
-            y: y,
-            color: getThread('warp', index),
-          });
-          blocks.weft.push({
-            x: x + i,
-            y: y,
-            color: getThread('weft', getIndex(y, 'weft')),
-          });
-        }
+        blocks[p[i] ? 'warpUp' : 'warpDown'].push({
+          x: x + i,
+          y: y,
+          color: getThread('warp', index),
+        });
       }
     }
   }
@@ -183,9 +174,8 @@ const drawWarp = ({ context, blocks, limit, warpCount }) => {
         );
       }
 
-      context.fillStyle = config.colorVariation
-        ? getRandomColorVariation(color, 0.05)
-        : color;
+      // context.fillStyle = color;
+      context.fillStyle = getRandomColorVariation(color, 0.05);
       // prettier-ignore
       context.fillRect(
         X, Y - 1,
@@ -196,26 +186,19 @@ const drawWarp = ({ context, blocks, limit, warpCount }) => {
 };
 
 // weft ↔️↔️↔️
-const drawWeft = ({
-  context,
-  blocks,
-  x: xLimit,
-  y: yLimit,
-  weftCount,
-  warpCount,
-}) => {
-  blocks.forEach(({ x, y, color }) => {
-    const X = x * config.threadSize;
-    const Y = y * config.threadSize;
-    const W = config.threadSize;
-    const H = config.threadSize;
+const drawWeft = ({ context, x: xLimit, y: yLimit, weftCount, warpCount }) => {
+  for (let y = config.looseEndSize; y < yLimit - config.looseEndSize; y++) {
     const limit = y === yLimit - config.looseEndSize - 1 ? xLimit : warpCount;
 
-    if (
-      x < limit &&
-      y >= config.looseEndSize &&
-      y < yLimit - config.looseEndSize
-    ) {
+    for (let x = 0; x < limit; x++) {
+      const index = getIndex(y, 'weft');
+      const color = getThread('weft', index);
+
+      const X = x * config.threadSize;
+      const Y = y * config.threadSize;
+      const W = config.threadSize;
+      const H = config.threadSize;
+
       if (
         config.shadow &&
         x >= config.looseEndSize &&
@@ -231,12 +214,11 @@ const drawWeft = ({
       }
 
       // thread
-      context.fillStyle = config.colorVariation
-        ? getRandomColorVariation(color, 0.05)
-        : color;
+      // context.fillStyle = color;
+      context.fillStyle = getRandomColorVariation(color, 0.05);
       context.fillRect(X - 1, Y, W + 1, H); // overlap to avoid gaps
     }
-  });
+  }
 };
 
 const weave = ({ context, pattern, width, height, playhead, x, y }) => {
@@ -255,6 +237,7 @@ const weave = ({ context, pattern, width, height, playhead, x, y }) => {
   // ↕️↕️↕️ (underneath)
   drawWarp({
     context,
+    type: 'under',
     blocks: blocks.warpDown,
     limit: weftLimit,
     warpCount,
@@ -262,20 +245,35 @@ const weave = ({ context, pattern, width, height, playhead, x, y }) => {
   // ↔️↔️↔️
   drawWeft({
     context,
-    blocks: blocks.weft,
     x: config.animateNeedle
       ? Math.ceil(warpCount * ((weftCount * playhead) % 1))
       : warpCount,
     y: weftLimit,
+    weftCount,
     warpCount,
   });
   // ↕️↕️↕️ (on top)
   drawWarp({
     context,
+    type: 'over',
     blocks: blocks.warpUp,
     limit: weftLimit,
     warpCount,
   });
+
+  // Apply darning pattern to worn-out areas
+  const threshold = 0.1; // Adjust this value to control the level of wear that triggers darning
+
+  for (let y = 0; y < height; y += config.threadSize) {
+    for (let x = 0; x < width; x += config.threadSize) {
+      const noiseValue = Random.noise2D(x / height, y / width, 5, 1);
+
+      if (noiseValue < threshold) {
+        context.fillStyle = '#000';
+        context.fillRect(x, y, config.threadSize, config.threadSize);
+      }
+    }
+  }
 };
 
 const getRandomColorVariation = (color, variation) => {
