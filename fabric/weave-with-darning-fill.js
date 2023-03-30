@@ -23,8 +23,8 @@ const config = {
   threadSize,
   margin: threadSize * 4, //threadSize * 8,
   shadowSize: 0.5 * 2,
-  animateWeft: true,
-  animateNeedle: true,
+  animateWeft: false,
+  animateNeedle: false,
   colorVariation: true,
   flutter: false,
 };
@@ -40,6 +40,12 @@ const colors = poline.colorsCSS;
 colors.forEach((color) => {
   console.log('%c  ', `background: ${color};`);
 });
+const otherColors = new Poline({
+  numPoints: 4,
+  positionFunctionX: positionFunctions.sinusoidalPosition,
+  positionFunctionY: positionFunctions.quadraticPosition,
+  positionFunctionZ: positionFunctions.linearPosition,
+}).colorsCSS;
 
 const shadowColor = chroma(colors.at(Math.floor(colors.length / 2)))
   .darken(1)
@@ -58,9 +64,18 @@ const threads = {
   warp: colors.slice(0, 7), // colors.slice(0, 7),
   weft: colors.slice(0, 7), // colors.slice(7),
 };
+const otherThreads = {
+  warp: otherColors,
+  weft: otherColors,
+};
 
 const getThread = (type, index) => {
   const thread = threads[type];
+  index = index > thread.length - 1 ? 0 : index;
+  return thread[index];
+};
+const getOtherThread = (type, index) => {
+  const thread = otherThreads[type];
   index = index > thread.length - 1 ? 0 : index;
   return thread[index];
 };
@@ -118,7 +133,7 @@ canvasSketch(sketch, settings);
 /**
  * Weave a pattern
  */
-const weaveStep = ({ pattern, weftCount, warpCount, limit }) => {
+const weaveStep = ({ pattern, weftCount, warpCount, playhead }) => {
   blocks = { warpUp: [], warpDown: [], weft: [] };
 
   for (let y = 0; y < weftCount; y++) {
@@ -129,7 +144,21 @@ const weaveStep = ({ pattern, weftCount, warpCount, limit }) => {
       for (let i = 0; i < step; i++) {
         const index = getIndex(x + i, threads.warp);
 
-        const noiseValue = Random.noise2D(x / warpCount, y / weftCount, 3, 1);
+        // const noiseValue = loopNoise(
+        //   {
+        //     cx: x / warpCount,
+        //     cy: y / weftCount,
+        //     radius: 1,
+        //   },
+        //   playhead
+        // );
+        const noiseValue = Random.noise3D(
+          x / warpCount,
+          y / weftCount,
+          playhead,
+          1,
+          1
+        );
 
         const hole = noiseValue < 0.1;
 
@@ -137,18 +166,24 @@ const weaveStep = ({ pattern, weftCount, warpCount, limit }) => {
           blocks.warpUp.push({
             x: x + i,
             y: y,
-            color: hole ? '#000' : getThread('warp', index),
+            color: hole
+              ? getOtherThread('warp', index)
+              : getThread('warp', index),
           });
         } else {
           blocks.warpDown.push({
             x: x + i,
             y: y,
-            color: hole ? '#000' : getThread('warp', index),
+            color: hole
+              ? getOtherThread('warp', index)
+              : getThread('warp', index),
           });
           blocks.weft.push({
             x: x + i,
             y: y,
-            color: hole ? '#000' : getThread('weft', getIndex(y, 'weft')),
+            color: hole
+              ? getOtherThread('weft', getIndex(y, 'weft'))
+              : getThread('weft', getIndex(y, 'weft')),
           });
         }
       }
@@ -337,4 +372,13 @@ function createSVGFilter() {
   filter.appendChild(feDisplacementMap);
 
   return [svg, feTurbulence, feDisplacementMap];
+}
+
+function loopNoise({ cx, cy, radius }, playhead) {
+  return Random.noise2D(
+    cx + radius * playhead * Math.cos(Math.PI * 2 * playhead),
+    cy + radius * playhead * Math.sin(Math.PI * 2 * playhead),
+    1,
+    1
+  );
 }

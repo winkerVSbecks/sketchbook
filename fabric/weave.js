@@ -26,7 +26,7 @@ const config = {
   animateWeft: true,
   animateNeedle: true,
   colorVariation: true,
-  flutter: false,
+  flutter: true,
 };
 
 const poline = new Poline({
@@ -73,8 +73,8 @@ const sketch = ({ canvas }) => {
 
   console.table(pattern);
 
+  const [svgFilter, feTurbulence, feDisplacementMap] = createSVGFilter();
   if (config.flutter) {
-    const [svgFilter, feTurbulence, feDisplacementMap] = createSVGFilter();
     document.body.appendChild(svgFilter);
     canvas.style.filter = 'url(#hand-drawn)';
   }
