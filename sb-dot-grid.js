@@ -5,7 +5,7 @@ const chroma = require('chroma-js');
 const load = require('load-asset');
 
 const settings = {
-  dimensions: [1200, 640],
+  dimensions: [640, 640],
   animate: true,
   duration: 2,
   scaleToView: true,
@@ -13,7 +13,7 @@ const settings = {
 };
 
 const colors = {
-  surface: '#0000EC', // rgb(0 0 236 / 100%)
+  surface: '#0000EC',
   highlight: '#fff',
   mid: 'rgba(255, 255, 255, 0.5)',
 };
@@ -25,13 +25,14 @@ const config = {
   margin: 24,
 };
 
-const sketch = async ({ width, height }) => {
-  const rnImage = await load('/imgs/rn.svg');
-  const sbIcon = await load('/imgs/storybook-icon.svg');
-
+const sketch = ({ width, height }) => {
   const grid = makeGrid({ width, height });
   const bits = new Array(20).fill(0).map(() => {
-    const type = Random.pick(['pulse', 'arc', 'gradientStroke']);
+    const type = Random.weightedSet([
+      { value: 'pulse', weight: 50 },
+      { value: 'arc', weight: 50 },
+      { value: 'gradientStroke', weight: 200 },
+    ]); //Random.pick(['pulse', 'arc', 'gradientStroke']);
     const location = pickFromGrid(grid);
     const path = createPath({ start: location, grid, stepCount: 16 });
 
@@ -63,10 +64,9 @@ const sketch = async ({ width, height }) => {
         });
       });
 
-      context.drawImage(sbIcon, 260, height / 2 - 126 / 2, 100, 126);
-      context.drawImage(rnImage, 600, height / 2 - 134 / 2, 347, 134);
-
-      plus({ context, width, height });
+      context.fillStyle = colors.mid;
+      const s = width * 0.25;
+      context.fillRect(width / 2 - s / 2, height / 2 - s / 2, s, s);
     },
   };
 };
@@ -87,7 +87,7 @@ function makeGrid({ width, height }) {
   const skipY = Math.floor(res[1] / 3);
 
   for (let y = 1; y < res[1]; y++) {
-    for (let x = 1; x < res[0] - 1; x++) {
+    for (let x = 1; x < res[0]; x++) {
       if (x < skipX || x >= res[0] - skipX || y < skipY || y > res[1] - skipY) {
         pts.push({
           x: config.dotOffset + x * config.dotSpacing,
