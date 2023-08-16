@@ -12,13 +12,12 @@ const settings = {
   animate: true,
   duration: 5,
   scaleToView: true,
-  loop: true,
+  loop: false,
 };
 
 const threadSize = 5 * 2;
 const config = {
   shadow: true,
-  gap: 0, // gap logic is broken
   looseEndSize: 0,
   threadSize,
   margin: threadSize * 4, //threadSize * 8,
