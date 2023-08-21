@@ -9,7 +9,8 @@ const {
 const settings = {
   dimensions: [1080, 1080],
   animate: true,
-  // duration: 4,
+  duration: 40,
+  // fps: 60,
   scaleToView: true,
 };
 
@@ -23,133 +24,77 @@ const poline = new Poline({
 
 let colorSet = poline.colorsCSS;
 
+const evolutionFunctions = [
+  transposeRightToLeft,
+  transposeAndShiftRightToLeft,
+  rightToLeft,
+  wipeBottomToTop,
+  wipeAltBottomToTop,
+  replaceBottomRow,
+];
+
 const ruleNumber = Random.rangeFloor(0, 255); // 156 135 214 195 151 246 250 190
-let ruleSet = generateRuleSet(ruleNumber); //  [0, 1, 0, 1, 1, 0, 1, 0];
+const ruleSet = generateRuleSet(ruleNumber); //  [0, 1, 0, 1, 1, 0, 1, 0];
+const state = {
+  cells: [],
+  generations: [],
+  activeLayer: 0,
+  evolving: true,
+  evolutionFunction: Random.pick(evolutionFunctions),
+};
 
 const sketch = () => {
   console.clear();
   Random.setSeed(Random.getRandomSeed());
   console.log(ruleNumber, ruleSet);
   console.log(colorSet.length);
-  console.log(randomHSLPair(), poline);
 
-  let cells;
-  let generations = [];
-  let w = 20;
+  const w = 20;
+  // const w = 50;
   let count;
-  let activeLayer = 0;
 
   return {
     begin({ width }) {
       count = Math.floor(width / w);
-      activeLayer = count - 1;
-      cells = new Array(count);
-      generations = [];
+      state.activeLayer = count - 1;
+      state.cells = new Array(count);
+      state.generations = [];
 
       for (let i = 0; i < count; i++) {
-        cells[i] = {
+        state.cells[i] = {
           value: Random.chance() ? 0 : 1,
           color: Random.pick(colorSet),
         };
       }
 
-      generations.push(cells);
+      state.generations.push(state.cells);
 
       for (let i = 1; i < count; i++) {
-        cells = step(cells);
-        generations.push(cells);
+        state.cells = step(state.cells);
+        state.generations.push(state.cells);
       }
     },
-    render({ context, width, height, frame }) {
+    render({ context, width, height, frame, time }) {
       context.fillStyle = '#fff';
       context.clearRect(0, 0, width, height);
       context.fillRect(0, 0, width, height);
 
       if (frame % 5 === 0) {
-        // Transpose: Right to left
-        cells = step(generations[activeLayer]);
+        if (state.activeLayer === 0) {
+          state.evolutionFunction = Random.pick(evolutionFunctions);
+          state.activeLayer = count - 1;
+          console.log(state.evolutionFunction.name);
+        } else {
+          state.activeLayer--;
+        }
 
-        generations.forEach((gCells, idx) => {
-          if (idx > 20 && idx < 40) {
-            gCells[activeLayer] = cells[idx];
-          }
-        });
-
-        poline.shiftHue(10);
-        colorSet = poline.colorsCSS;
-        activeLayer = activeLayer === 0 ? count - 1 : activeLayer - 1;
-
-        // // Transpose & Shift: Right to left
-        // cells = step(generations[activeLayer]);
-
-        // generations.forEach((gCells, idx) => {
-        //   gCells.shift();
-        //   gCells.push(cells[idx]);
-        // });
-
-        // poline.shiftHue(10);
-        // colorSet = poline.colorsCSS;
-        // activeLayer = activeLayer === 0 ? count - 1 : activeLayer - 1;
-
-        // ---
-
-        // // Transpose: Right to left
-        // cells = step(generations[activeLayer]);
-
-        // generations.forEach((gCells, idx) => {
-        //   gCells[activeLayer] = cells[idx];
-        // });
-
-        // poline.shiftHue(10);
-        // colorSet = poline.colorsCSS;
-        // activeLayer = activeLayer === 0 ? count - 1 : activeLayer - 1;
-
-        // ---
-
-        // // Right to left
-        // columnCells = generations.map((cells) => cells[activeLayer]);
-        // columnCells = step(columnCells);
-
-        // generations.forEach((cells, idx) => {
-        //   cells[activeLayer] = columnCells[idx];
-        // });
-
-        // poline.shiftHue(10);
-        // colorSet = poline.colorsCSS;
-        // activeLayer = activeLayer === 0 ? count - 1 : activeLayer - 1;
-
-        // ---
-
-        // // Wipe effect # 1, bottom to top, one row at a time
-        // cells = step(generations[count - activeLayer]);
-        // generations[activeLayer] = cells;
-        // activeLayer = activeLayer === 0 ? count - 1 : activeLayer - 1;
-
-        // poline.shiftHue(10);
-        // colorSet = poline.colorsCSS;
-
-        // ---
-
-        // // Wipe effect # 2, bottom to top, one row at a time
-        // cells = step(generations[activeLayer]);
-        // generations[activeLayer] = cells;
-        // activeLayer = activeLayer === 0 ? count - 1 : activeLayer - 1;
-
-        // poline.shiftHue(10);
-        // colorSet = poline.colorsCSS;
-
-        // ---
-
-        // // Replace bottom row
-        // cells = step(cells);
-        // generations.shift();
-        // generations.push(cells);
-        // poline.shiftHue(10);
-        // colorSet = poline.colorsCSS;
+        if (state.activeLayer > 0) {
+          state.evolutionFunction(count);
+        }
       }
 
       // Draw cells
-      generations.forEach((cells, generation) => {
+      state.generations.forEach((cells, generation) => {
         cells.forEach((cell, x) => {
           context.fillStyle = cell.color;
           context.fillRect(x * w, generation * w, w, w);
@@ -200,4 +145,69 @@ function toBinary(n) {
     if (n == 0) break;
   }
   return s;
+}
+
+function transposeRightToLeft() {
+  state.cells = step(state.generations[state.activeLayer]);
+
+  state.generations.forEach((gCells, idx) => {
+    gCells[state.activeLayer] = state.cells[idx];
+  });
+
+  poline.shiftHue(10);
+  colorSet = poline.colorsCSS;
+}
+
+function transposeAndShiftRightToLeft() {
+  // Transpose & Shift: Right to left
+  state.cells = step(state.generations[state.activeLayer]);
+
+  state.generations.forEach((gCells, idx) => {
+    gCells.shift();
+    gCells.push(state.cells[idx]);
+  });
+
+  poline.shiftHue(10);
+  colorSet = poline.colorsCSS;
+}
+
+function rightToLeft() {
+  // Right to left
+  let columnCells = state.generations.map((cells) => cells[state.activeLayer]);
+  columnCells = step(columnCells);
+
+  state.generations.forEach((cells, idx) => {
+    cells[state.activeLayer] = columnCells[idx];
+  });
+
+  poline.shiftHue(10);
+  colorSet = poline.colorsCSS;
+}
+
+function wipeBottomToTop(count) {
+  // Wipe effect # 1, bottom to top, one row at a time
+  state.cells = step(state.generations[count - state.activeLayer]);
+  state.generations[state.activeLayer] = state.cells;
+
+  poline.shiftHue(10);
+  colorSet = poline.colorsCSS;
+}
+
+function wipeAltBottomToTop() {
+  // Wipe effect # 2, bottom to top, one row at a time
+  state.cells = step(state.generations[state.activeLayer]);
+  state.generations[state.activeLayer] = state.cells;
+
+  poline.shiftHue(10);
+  colorSet = poline.colorsCSS;
+}
+
+function replaceBottomRow() {
+  // Replace bottom row
+  state.cells = step(state.cells);
+  state.generations.shift();
+  state.generations.push(state.cells);
+  poline.shiftHue(10);
+
+  colorSet = poline.colorsCSS;
 }
