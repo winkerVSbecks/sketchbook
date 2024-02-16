@@ -104,7 +104,6 @@ const sketch = () => {
     }, []);
 
     shapesGroup.addChildren(intersections);
-    // shapesGroup.reduce();
 
     shapesGroup.fitBounds(circle.bounds);
 
@@ -130,60 +129,38 @@ const sketch = () => {
       paper.project.activeLayer.removeChildren();
       paper.view.draw();
 
-      const radius = width / 2;
-      const position = new paper.Point(width / 2, height / 2);
-      const shapeCount = Random.rangeFloor(2, 5);
-      const types = new Array(shapeCount)
-        .fill(0)
-        .map(() => Random.pick(shapeTypes));
-      const shapePromises = types.map((shape) => {
-        return new Promise((res) =>
-          paper.project.importSVG(`imgs/${shape}.svg`, {
-            insert: false,
-            onLoad: (path) => {
-              shiftAndScale(paper, radius, path);
-              res(path);
-            },
-          })
-        );
+      pack({
+        dimensions: 2,
+        bounds: height,
+        sample: () => [
+          Random.rangeFloor(0, width),
+          Random.rangeFloor(0, height),
+        ],
+        minRadius: width * 0.05,
+        maxRadius: width * 0.125,
+        padding: width * 0.01,
+      }).map(({ position, radius }) => {
+        const shapeCount = Random.rangeFloor(1, 4);
+        const types = new Array(shapeCount)
+          .fill(0)
+          .map(() => Random.pick(shapeTypes));
+
+        const shapePromises = types.map((shape) => {
+          return new Promise((res) =>
+            paper.project.importSVG(`imgs/${shape}.svg`, {
+              insert: false,
+              onLoad: (path) => {
+                shiftAndScale(paper, radius, path);
+                res(path);
+              },
+            })
+          );
+        });
+
+        Promise.all(shapePromises).then((shapes) => {
+          intersectShapes(shapes, position, radius);
+        });
       });
-
-      Promise.all(shapePromises).then((shapes) => {
-        intersectShapes(shapes, position, radius);
-      });
-
-      // pack({
-      //   dimensions: 2,
-      //   bounds: height,
-      //   sample: () => [
-      //     Random.rangeFloor(0, width),
-      //     Random.rangeFloor(0, height),
-      //   ],
-      //   minRadius: width * 0.05,
-      //   maxRadius: width * 0.125,
-      //   padding: width * 0.01,
-      // }).map(({ position, radius }) => {
-      //   const shapeCount = Random.rangeFloor(1, 4);
-      //   const types = new Array(shapeCount)
-      //     .fill(0)
-      //     .map(() => Random.pick(shapeTypes));
-
-      //   const shapePromises = types.map((shape) => {
-      //     return new Promise((res) =>
-      //       paper.project.importSVG(`imgs/${shape}.svg`, {
-      //         insert: false,
-      //         onLoad: (path) => {
-      //           shiftAndScale(paper, radius, path);
-      //           res(path);
-      //         },
-      //       })
-      //     );
-      //   });
-
-      //   Promise.all(shapePromises).then((shapes) => {
-      //     intersectShapes(shapes, position, radius);
-      //   });
-      // });
     },
     render({ context, styleWidth, styleHeight, frame, time }) {},
     // resize({ width, height }) {
