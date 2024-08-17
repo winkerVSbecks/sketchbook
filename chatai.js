@@ -8,9 +8,9 @@ const d3 = require('d3-quadtree');
 const settings = {
   dimensions: [2048, 2048],
   animate: true,
-  // duration: 6,
-  // fps: 6,
-  // playbackRate: 'throttle',
+  duration: 6,
+  fps: 60,
+  playbackRate: 'throttle',
 };
 
 window.fxHash = {
@@ -112,9 +112,9 @@ const sketch = () => {
         .filter((cell) => !cell.occupied)
         .filter((cell) => inNode(cell));
 
-      // if (state.walkers.length === 0) {
-      //   spawnWalker();
-      // }
+      if (state.walkers.length === 0) {
+        spawnWalker();
+      }
 
       if (
         validOptions.length === 0 &&
