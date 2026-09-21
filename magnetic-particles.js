@@ -23,7 +23,7 @@ const CONFIG = {
 };
 
 const sketch = async () => {
-  const image = await load('./imgs/e267d9be51f1096b2dd901db693a55ec.png');
+  const image = await load('./imgs/cloud-1.jpg');
 
   let particles, planets, poissonDiskSamples;
   const foreground = clrs.ink(); // '#fff';
